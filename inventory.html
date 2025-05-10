@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom styles */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .search-dropdown {
+            max-height: 300px;
+            overflow-y: auto;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+     <!-- Sidebar -->
+     <div class="sidebar fixed inset-y-0 left-0 bg-white w-64 shadow-lg z-10">
+        <div class="flex items-center justify-center h-16 px-4 bg-blue-700">
+            <img src="https://via.placeholder.com/150x50?text=Skyray+Engineering" alt="Skyray Engineering Logo" class="h-8">
+        </div>
+        
+        <nav class="mt-6">
+            <a href="index.html" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-100">
+                    <span class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                        </svg>
+                        Dashboard
+                    </span>
+            </a>
+            
+
+            
+            <div class="px-4 py-3 bg-blue-50 text-blue-700 border-l-4 border-blue-700">
+                <span class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd" />
+                    </svg>
+                    Inventory
+                </span>
+            </div>
+            
+            <a href="report.html" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L10 1.414A2 2 0 008.586 0H6zm5 6a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V8z" clip-rule="evenodd" />
+                </svg>
+                Reports
+            </a>
+            
+            <a href="#" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+                </svg>
+                Settings
+            </a>
+        </nav>
+        
+        <div class="absolute bottom-0 w-full p-4">
+            <button id="logout-btn" class="w-full flex items-center justify-center px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />
+                </svg>
+                Logout
+            </button>
+        </div>
+    </div>
+    
+    <!-- Mobile Menu Button -->
+    <button id="mobile-menu-btn" class="md:hidden fixed top-4 left-4 z-20 bg-white p-2 rounded-md shadow-md">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Inventory Management</h1>
+            <p class="text-gray-600">Track and manage your inventory items</p>
+        </header>
+        
+        <!-- Search Box Section -->
+        <section class="mb-10">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">Search Inventory</h2>
+                
+                <div class="relative">
+                    <div class="flex items-center border-2 border-gray-200 rounded-lg overflow-hidden">
+                        <span class="px-3 text-gray-500">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            placeholder="Search by item name or company..." 
+                            class="py-2 px-2 w-full focus:outline-none text-gray-700"
+                            autocomplete="off"
+                        >
+                        <button 
+                            id="clearSearch" 
+                            class="px-3 text-gray-500 hover:text-gray-700 hidden"
+                        >
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Search Dropdown -->
+                    <div id="searchDropdown" class="hidden absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg search-dropdown">
+                        <div class="py-1">
+                            <!-- Results will be populated here by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-3 flex flex-wrap gap-2">
+                    <span class="text-sm text-gray-500">Search by:</span>
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" class="form-checkbox text-blue-500" checked id="searchByName">
+                        <span class="ml-2 text-gray-700">Item Name</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" class="form-checkbox text-blue-500" checked id="searchByCompany">
+                        <span class="ml-2 text-gray-700">Company</span>
+                    </label>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Inventory Table Section -->
+        <section>
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                    <h2 class="text-xl font-semibold text-gray-700">Inventory Items</h2>
+                    
+                    <div class="flex items-center space-x-3">
+                        <div class="relative">
+                            <select id="sortBy" class="appearance-none bg-gray-100 border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-blue-500">
+                                <option value="name-asc">Name (A-Z)</option>
+                                <option value="name-desc">Name (Z-A)</option>
+                                <option value="company-asc">Company (A-Z)</option>
+                                <option value="company-desc">Company (Z-A)</option>
+                                <option value="cost-asc">Cost (Low-High)</option>
+                                <option value="cost-desc">Cost (High-Low)</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+                        
+                        <button id="addItemBtn" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded flex items-center">
+                            <i class="fas fa-plus mr-2"></i>
+                            Add Item
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 sort-header" data-sort="name">
+                                    Item Name <i class="fas fa-sort ml-1"></i>
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 sort-header" data-sort="company">
+                                    Buy Company <i class="fas fa-sort ml-1"></i>
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 sort-header" data-sort="cost">
+                                    Cost <i class="fas fa-sort ml-1"></i>
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    QR/Barcode
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Table rows will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="px-6 py-4 border-t border-gray-200 flex justify-between items-center">
+                    <div class="text-sm text-gray-500">
+                        Showing <span id="showingFrom">1</span> to <span id="showingTo">10</span> of <span id="totalItems">50</span> items
+                    </div>
+                    <div class="flex space-x-2">
+                        <button id="prevPage" class="px-3 py-1 border rounded text-gray-700 bg-gray-50 hover:bg-gray-100 disabled:opacity-50">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div id="pageNumbers" class="flex space-x-1">
+                            <!-- Page numbers will be added here -->
+                        </div>
+                        <button id="nextPage" class="px-3 py-1 border rounded text-gray-700 bg-gray-50 hover:bg-gray-100 disabled:opacity-50">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <!-- Item Details Modal -->
+    <div id="itemModal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-overlay absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl fade-in">
+                <div class="flex justify-between items-center border-b px-6 py-4">
+                    <h3 class="text-xl font-semibold text-gray-800">Item Details</h3>
+                    <button id="closeModal" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <div class="mb-4">
+                                <h4 class="text-sm font-medium text-gray-500">Item Name</h4>
+                                <p id="modalItemName" class="mt-1 text-lg font-medium text-gray-900">-</p>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h4 class="text-sm font-medium text-gray-500">Company</h4>
+                                <p id="modalCompany" class="mt-1 text-lg text-gray-700">-</p>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h4 class="text-sm font-medium text-gray-500">Cost</h4>
+                                <p id="modalCost" class="mt-1 text-lg font-semibold text-blue-600">-</p>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h4 class="text-sm font-medium text-gray-500">Added Date</h4>
+                                <p id="modalDate" class="mt-1 text-gray-700">-</p>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h4 class="text-sm font-medium text-gray-500">Description</h4>
+                                <p id="modalDescription" class="mt-1 text-gray-700">No description available</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-col items-center justify-center">
+                            <div class="bg-white p-4 rounded-lg border border-gray-200 mb-4">
+                                <div id="modalQrCode" class="w-40 h-40 flex items-center justify-center bg-gray-100">
+                                    <span class="text-gray-500">QR Code</span>
+                                </div>
+                            </div>
+                            <button class="text-blue-500 hover:text-blue-700 flex items-center">
+                                <i class="fas fa-download mr-2"></i>
+                                Download QR Code
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="border-t px-6 py-4 flex justify-end space-x-3">
+                    <button id="editItemBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                        <i class="fas fa-edit mr-2"></i> Edit
+                    </button>
+                    <button id="deleteItemBtn" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
+                        <i class="fas fa-trash mr-2"></i> Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Item Modal -->
+    <div id="addItemModal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-overlay absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl fade-in">
+                <div class="flex justify-between items-center border-b px-6 py-4">
+                    <h3 class="text-xl font-semibold text-gray-800">Add New Item</h3>
+                    <button id="closeAddModal" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="p-6">
+                    <form id="addItemForm">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="newItemName" class="block text-sm font-medium text-gray-700 mb-1">Item Name *</label>
+                                <input type="text" id="newItemName" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            
+                            <div>
+                                <label for="newCompany" class="block text-sm font-medium text-gray-700 mb-1">Company *</label>
+                                <input type="text" id="newCompany" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            
+                            <div>
+                                <label for="newCost" class="block text-sm font-medium text-gray-700 mb-1">Cost *</label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">$</span>
+                                    <input type="number" id="newCost" step="0.01" min="0" required class="w-full pl-8 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label for="newBarcode" class="block text-sm font-medium text-gray-700 mb-1">Barcode/QR Data</label>
+                                <input type="text" id="newBarcode" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            
+                            <div class="md:col-span-2">
+                                <label for="newDescription" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                <textarea id="newDescription" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="border-t px-6 py-4 flex justify-end space-x-3">
+                    <button id="cancelAddItem" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button id="saveItemBtn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                        <i class="fas fa-save mr-2"></i> Save Item
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Sample inventory data
+        let inventoryData = [
+            { id: 1, name: "Laptop Pro X1", company: "TechCorp", cost: 1299.99, barcode: "LPX1001", date: "2023-05-15", description: "High-performance business laptop with 16GB RAM" },
+            { id: 2, name: "Wireless Mouse", company: "PeriTech", cost: 29.99, barcode: "WM2002", date: "2023-06-02", description: "Ergonomic wireless mouse with silent clicks" },
+            { id: 3, name: "4K Monitor", company: "DisplayPlus", cost: 499.99, barcode: "4KM3003", date: "2023-04-20", description: "27-inch 4K UHD monitor with HDR" },
+            { id: 4, name: "Mechanical Keyboard", company: "KeyMasters", cost: 89.99, barcode: "MK4004", date: "2023-07-10", description: "RGB mechanical keyboard with blue switches" },
+            { id: 5, name: "USB-C Hub", company: "ConnectTech", cost: 39.99, barcode: "UCH5005", date: "2023-03-28", description: "7-in-1 USB-C hub with HDMI and Ethernet" },
+            { id: 6, name: "Noise Cancelling Headphones", company: "AudioPro", cost: 199.99, barcode: "NCH6006", date: "2023-06-18", description: "Wireless headphones with 30hr battery life" },
+            { id: 7, name: "External SSD 1TB", company: "StoragePlus", cost: 129.99, barcode: "ESS7007", date: "2023-05-30", description: "Portable SSD with 1050MB/s read speed" },
+            { id: 8, name: "Webcam HD", company: "VisionTech", cost: 59.99, barcode: "WCH8008", date: "2023-07-05", description: "1080p webcam with built-in microphone" },
+            { id: 9, name: "Laptop Stand", company: "ErgoWorks", cost: 24.99, barcode: "LS9009", date: "2023-04-12", description: "Adjustable aluminum laptop stand" },
+            { id: 10, name: "Power Bank 20000mAh", company: "ChargePlus", cost: 49.99, barcode: "PB10010", date: "2023-06-25", description: "Fast charging power bank with USB-C PD" },
+            { id: 11, name: "Bluetooth Speaker", company: "SoundWave", cost: 79.99, barcode: "BS11011", date: "2023-03-15", description: "Portable waterproof speaker with 12hr playtime" },
+            { id: 12, name: "Monitor Arm", company: "ErgoWorks", cost: 89.99, barcode: "MA12012", date: "2023-07-01", description: "Dual monitor arm with gas spring" },
+            { id: 13, name: "Wireless Charger", company: "ChargePlus", cost: 34.99, barcode: "WC13013", date: "2023-05-22", description: "15W fast wireless charging pad" },
+            { id: 14, name: "Gaming Mouse", company: "GameTech", cost: 59.99, barcode: "GM14014", date: "2023-04-05", description: "Programmable gaming mouse with RGB" },
+            { id: 15, name: "Laptop Backpack", company: "UrbanGear", cost: 69.99, barcode: "LB15015", date: "2023-06-10", description: "Water-resistant backpack with USB charging port" }
+        ];
+        
+        // Current state
+        let currentState = {
+            sortBy: 'name-asc',
+            currentPage: 1,
+            itemsPerPage: 10,
+            searchQuery: '',
+            selectedItem: null
+        };
+        
+        // DOM Elements
+        const elements = {
+            searchInput: document.getElementById('searchInput'),
+            clearSearch: document.getElementById('clearSearch'),
+            searchDropdown: document.getElementById('searchDropdown'),
+            searchByName: document.getElementById('searchByName'),
+            searchByCompany: document.getElementById('searchByCompany'),
+            inventoryTableBody: document.getElementById('inventoryTableBody'),
+            sortBy: document.getElementById('sortBy'),
+            prevPage: document.getElementById('prevPage'),
+            nextPage: document.getElementById('nextPage'),
+            pageNumbers: document.getElementById('pageNumbers'),
+            showingFrom: document.getElementById('showingFrom'),
+            showingTo: document.getElementById('showingTo'),
+            totalItems: document.getElementById('totalItems'),
+            itemModal: document.getElementById('itemModal'),
+            closeModal: document.getElementById('closeModal'),
+            modalItemName: document.getElementById('modalItemName'),
+            modalCompany: document.getElementById('modalCompany'),
+            modalCost: document.getElementById('modalCost'),
+            modalDate: document.getElementById('modalDate'),
+            modalDescription: document.getElementById('modalDescription'),
+            modalQrCode: document.getElementById('modalQrCode'),
+            editItemBtn: document.getElementById('editItemBtn'),
+            deleteItemBtn: document.getElementById('deleteItemBtn'),
+            addItemBtn: document.getElementById('addItemBtn'),
+            addItemModal: document.getElementById('addItemModal'),
+            closeAddModal: document.getElementById('closeAddModal'),
+            addItemForm: document.getElementById('addItemForm'),
+            newItemName: document.getElementById('newItemName'),
+            newCompany: document.getElementById('newCompany'),
+            newCost: document.getElementById('newCost'),
+            newBarcode: document.getElementById('newBarcode'),
+            newDescription: document.getElementById('newDescription'),
+            cancelAddItem: document.getElementById('cancelAddItem'),
+            saveItemBtn: document.getElementById('saveItemBtn'),
+            sortHeaders: document.querySelectorAll('.sort-header')
+        };
+        
+        // Initialize the app
+        function init() {
+            renderInventoryTable();
+            setupEventListeners();
+        }
+        
+        // Set up event listeners
+        function setupEventListeners() {
+            // Search functionality
+            elements.searchInput.addEventListener('input', handleSearchInput);
+            elements.clearSearch.addEventListener('click', clearSearch);
+            elements.searchByName.addEventListener('change', handleSearchInput);
+            elements.searchByCompany.addEventListener('change', handleSearchInput);
+            
+            // Sorting
+            elements.sortBy.addEventListener('change', () => {
+                currentState.sortBy = elements.sortBy.value;
+                renderInventoryTable();
+            });
+            
+            elements.sortHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    const sortField = header.dataset.sort;
+                    const currentSort = currentState.sortBy.split('-')[0];
+                    const currentDirection = currentState.sortBy.split('-')[1];
+                    
+                    if (sortField === currentSort) {
+                        // Toggle direction
+                        currentState.sortBy = `${sortField}-${currentDirection === 'asc' ? 'desc' : 'asc'}`;
+                    } else {
+                        // Default to ascending
+                        currentState.sortBy = `${sortField}-asc`;
+                    }
+                    
+                    // Update the select dropdown to match
+                    elements.sortBy.value = currentState.sortBy;
+                    renderInventoryTable();
+                });
+            });
+            
+            // Pagination
+            elements.prevPage.addEventListener('click', () => {
+                if (currentState.currentPage > 1) {
+                    currentState.currentPage--;
+                    renderInventoryTable();
+                }
+            });
+            
+            elements.nextPage.addEventListener('click', () => {
+                const totalPages = Math.ceil(getFilteredItems().length / currentState.itemsPerPage);
+                if (currentState.currentPage < totalPages) {
+                    currentState.currentPage++;
+                    renderInventoryTable();
+                }
+            });
+            
+            // Modal
+            elements.closeModal.addEventListener('click', () => {
+                elements.itemModal.classList.add('hidden');
+            });
+            
+            elements.closeAddModal.addEventListener('click', () => {
+                elements.addItemModal.classList.add('hidden');
+            });
+            
+            elements.cancelAddItem.addEventListener('click', () => {
+                elements.addItemModal.classList.add('hidden');
+            });
+            
+            // Add new item
+            elements.addItemBtn.addEventListener('click', () => {
+                elements.addItemForm.reset();
+                elements.addItemModal.classList.remove('hidden');
+            });
+            
+            elements.saveItemBtn.addEventListener('click', addNewItem);
+            
+            // Edit/Delete item
+            elements.editItemBtn.addEventListener('click', () => {
+                alert('Edit functionality would go here');
+            });
+            
+            elements.deleteItemBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to delete this item?')) {
+                    inventoryData = inventoryData.filter(item => item.id !== currentState.selectedItem.id);
+                    renderInventoryTable();
+                    elements.itemModal.classList.add('hidden');
+                }
+            });
+            
+            // Close modals when clicking outside
+            document.addEventListener('click', (e) => {
+                if (elements.itemModal.classList.contains('hidden') === false && 
+                    !e.target.closest('.modal-overlay > div')) {
+                    elements.itemModal.classList.add('hidden');
+                }
+                
+                if (elements.addItemModal.classList.contains('hidden') === false && 
+                    !e.target.closest('.modal-overlay > div')) {
+                    elements.addItemModal.classList.add('hidden');
+                }
+            });
+        }
+        
+        // Handle search input
+        function handleSearchInput() {
+            const query = elements.searchInput.value.trim().toLowerCase();
+            currentState.searchQuery = query;
+            currentState.currentPage = 1;
+            
+            if (query.length > 0) {
+                elements.clearSearch.classList.remove('hidden');
+                
+                // Show dropdown with matching items
+                const filteredItems = getFilteredItems();
+                renderSearchDropdown(filteredItems.slice(0, 5));
+            } else {
+                elements.clearSearch.classList.add('hidden');
+                elements.searchDropdown.classList.add('hidden');
+            }
+            
+            renderInventoryTable();
+        }
+        
+        // Clear search
+        function clearSearch() {
+            elements.searchInput.value = '';
+            currentState.searchQuery = '';
+            elements.clearSearch.classList.add('hidden');
+            elements.searchDropdown.classList.add('hidden');
+            renderInventoryTable();
+        }
+        
+        // Get filtered items based on search query
+        function getFilteredItems() {
+            const searchByName = elements.searchByName.checked;
+            const searchByCompany = elements.searchByCompany.checked;
+            
+            return inventoryData.filter(item => {
+                if (currentState.searchQuery === '') return true;
+                
+                const matchesName = searchByName && item.name.toLowerCase().includes(currentState.searchQuery);
+                const matchesCompany = searchByCompany && item.company.toLowerCase().includes(currentState.searchQuery);
+                
+                return matchesName || matchesCompany;
+            });
+        }
+        
+        // Sort items
+        function sortItems(items) {
+            const [field, direction] = currentState.sortBy.split('-');
+            
+            return items.sort((a, b) => {
+                let comparison = 0;
+                
+                if (field === 'name' || field === 'company') {
+                    comparison = a[field].localeCompare(b[field]);
+                } else if (field === 'cost') {
+                    comparison = a.cost - b.cost;
+                }
+                
+                return direction === 'asc' ? comparison : -comparison;
+            });
+        }
+        
+        // Render search dropdown
+        function renderSearchDropdown(items) {
+            const dropdownContent = elements.searchDropdown.querySelector('.py-1');
+            dropdownContent.innerHTML = '';
+            
+            if (items.length === 0) {
+                const noResults = document.createElement('div');
+                noResults.className = 'px-4 py-2 text-gray-500';
+                noResults.textContent = 'No matching items found';
+                dropdownContent.appendChild(noResults);
+            } else {
+                items.forEach(item => {
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'px-4 py-2 hover:bg-gray-100 cursor-pointer flex justify-between items-center';
+                    
+                    const leftDiv = document.createElement('div');
+                    leftDiv.className = 'flex-1';
+                    
+                    const nameDiv = document.createElement('div');
+                    nameDiv.className = 'font-medium text-gray-800';
+                    nameDiv.textContent = item.name;
+                    
+                    const companyDiv = document.createElement('div');
+                    companyDiv.className = 'text-sm text-gray-500';
+                    companyDiv.textContent = item.company;
+                    
+                    leftDiv.appendChild(nameDiv);
+                    leftDiv.appendChild(companyDiv);
+                    
+                    const rightDiv = document.createElement('div');
+                    rightDiv.className = 'text-right';
+                    
+                    const costDiv = document.createElement('div');
+                    costDiv.className = 'font-semibold text-blue-600';
+                    costDiv.textContent = `$${item.cost.toFixed(2)}`;
+                    
+                    rightDiv.appendChild(costDiv);
+                    
+                    resultItem.appendChild(leftDiv);
+                    resultItem.appendChild(rightDiv);
+                    
+                    resultItem.addEventListener('click', () => {
+                        showItemDetails(item);
+                        elements.searchDropdown.classList.add('hidden');
+                    });
+                    
+                    dropdownContent.appendChild(resultItem);
+                });
+            }
+            
+            elements.searchDropdown.classList.remove('hidden');
+        }
+        
+        // Render inventory table
+        function renderInventoryTable() {
+            const filteredItems = getFilteredItems();
+            const sortedItems = sortItems([...filteredItems]);
+            
+            const totalItems = sortedItems.length;
+            const totalPages = Math.ceil(totalItems / currentState.itemsPerPage);
+            
+            // Update pagination info
+            elements.totalItems.textContent = totalItems;
+            elements.showingFrom.textContent = ((currentState.currentPage - 1) * currentState.itemsPerPage) + 1;
+            elements.showingTo.textContent = Math.min(currentState.currentPage * currentState.itemsPerPage, totalItems);
+            
+            // Update pagination buttons
+            elements.prevPage.disabled = currentState.currentPage === 1;
+            elements.nextPage.disabled = currentState.currentPage === totalPages;
+            
+            // Render page numbers
+            renderPageNumbers(totalPages);
+            
+            // Calculate items to display
+            const startIndex = (currentState.currentPage - 1) * currentState.itemsPerPage;
+            const endIndex = Math.min(startIndex + currentState.itemsPerPage, totalItems);
+            const itemsToDisplay = sortedItems.slice(startIndex, endIndex);
+            
+            // Clear table
+            elements.inventoryTableBody.innerHTML = '';
+            
+            if (itemsToDisplay.length === 0) {
+                const emptyRow = document.createElement('tr');
+                emptyRow.className = 'bg-white';
+                
+                const emptyCell = document.createElement('td');
+                emptyCell.colSpan = 5;
+                emptyCell.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center';
+                emptyCell.textContent = 'No items found';
+                
+                emptyRow.appendChild(emptyCell);
+                elements.inventoryTableBody.appendChild(emptyRow);
+            } else {
+                itemsToDisplay.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-50';
+                    
+                    // Item Name
+                    const nameCell = document.createElement('td');
+                    nameCell.className = 'px-6 py-4 whitespace-nowrap';
+                    
+                    const nameDiv = document.createElement('div');
+                    nameDiv.className = 'flex items-center';
+                    
+                    const nameText = document.createElement('div');
+                    nameText.className = 'text-sm font-medium text-gray-900 cursor-pointer hover:text-blue-600';
+                    nameText.textContent = item.name;
+                    nameText.addEventListener('click', () => showItemDetails(item));
+                    
+                    nameDiv.appendChild(nameText);
+                    nameCell.appendChild(nameDiv);
+                    
+                    // Company
+                    const companyCell = document.createElement('td');
+                    companyCell.className = 'px-6 py-4 whitespace-nowrap';
+                    
+                    const companyDiv = document.createElement('div');
+                    companyDiv.className = 'text-sm text-gray-500';
+                    companyDiv.textContent = item.company;
+                    
+                    companyCell.appendChild(companyDiv);
+                    
+                    // Cost
+                    const costCell = document.createElement('td');
+                    costCell.className = 'px-6 py-4 whitespace-nowrap';
+                    
+                    const costDiv = document.createElement('div');
+                    costDiv.className = 'text-sm font-semibold text-blue-600';
+                    costDiv.textContent = `$${item.cost.toFixed(2)}`;
+                    
+                    costCell.appendChild(costDiv);
+                    
+                    // QR/Barcode
+                    const qrCell = document.createElement('td');
+                    qrCell.className = 'px-6 py-4 whitespace-nowrap';
+                    
+                    const qrDiv = document.createElement('div');
+                    qrDiv.className = 'flex items-center';
+                    
+                    const qrIcon = document.createElement('i');
+                    qrIcon.className = 'fas fa-qrcode text-gray-400 mr-2';
+                    
+                    const qrText = document.createElement('span');
+                    qrText.className = 'text-sm text-gray-500';
+                    qrText.textContent = item.barcode;
+                    
+                    qrDiv.appendChild(qrIcon);
+                    qrDiv.appendChild(qrText);
+                    qrCell.appendChild(qrDiv);
+                    
+                    // Actions
+                    const actionsCell = document.createElement('td');
+                    actionsCell.className = 'px-6 py-4 whitespace-nowrap text-right text-sm font-medium';
+                    
+                    const viewButton = document.createElement('button');
+                    viewButton.className = 'text-blue-500 hover:text-blue-700 mr-3';
+                    viewButton.innerHTML = '<i class="fas fa-eye"></i>';
+                    viewButton.title = 'View';
+                    viewButton.addEventListener('click', () => showItemDetails(item));
+                    
+                    const editButton = document.createElement('button');
+                    editButton.className = 'text-yellow-500 hover:text-yellow-700 mr-3';
+                    editButton.innerHTML = '<i class="fas fa-edit"></i>';
+                    editButton.title = 'Edit';
+                    
+                    const deleteButton = document.createElement('button');
+                    deleteButton.className = 'text-red-500 hover:text-red-700';
+                    deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
+                    deleteButton.title = 'Delete';
+                    deleteButton.addEventListener('click', () => {
+                        if (confirm('Are you sure you want to delete this item?')) {
+                            inventoryData = inventoryData.filter(i => i.id !== item.id);
+                            renderInventoryTable();
+                        }
+                    });
+                    
+                    actionsCell.appendChild(viewButton);
+                    actionsCell.appendChild(editButton);
+                    actionsCell.appendChild(deleteButton);
+                    
+                    row.appendChild(nameCell);
+                    row.appendChild(companyCell);
+                    row.appendChild(costCell);
+                    row.appendChild(qrCell);
+                    row.appendChild(actionsCell);
+                    
+                    elements.inventoryTableBody.appendChild(row);
+                });
+            }
+        }
+        
+        // Render page numbers
+        function renderPageNumbers(totalPages) {
+            elements.pageNumbers.innerHTML = '';
+            
+            const maxVisiblePages = 5;
+            let startPage, endPage;
+            
+            if (totalPages <= maxVisiblePages) {
+                // Show all pages
+                startPage = 1;
+                endPage = totalPages;
+            } else {
+                // Calculate start and end pages
+                const maxPagesBeforeCurrent = Math.floor(maxVisiblePages / 2);
+                const maxPagesAfterCurrent = Math.ceil(maxVisiblePages / 2) - 1;
+                
+                if (currentState.currentPage <= maxPagesBeforeCurrent) {
+                    // Current page near the start
+                    startPage = 1;
+                    endPage = maxVisiblePages;
+                } else if (currentState.currentPage + maxPagesAfterCurrent >= totalPages) {
+                    // Current page near the end
+                    startPage = totalPages - maxVisiblePages + 1;
+                    endPage = totalPages;
+                } else {
+                    // Current page somewhere in the middle
+                    startPage = currentState.currentPage - maxPagesBeforeCurrent;
+                    endPage = currentState.currentPage + maxPagesAfterCurrent;
+                }
+            }
+            
+            // Add first page and ellipsis if needed
+            if (startPage > 1) {
+                const firstPage = createPageNumber(1);
+                elements.pageNumbers.appendChild(firstPage);
+                
+                if (startPage > 2) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.className = 'px-3 py-1';
+                    ellipsis.textContent = '...';
+                    elements.pageNumbers.appendChild(ellipsis);
+                }
+            }
+            
+            // Add page numbers
+            for (let i = startPage; i <= endPage; i++) {
+                const pageNumber = createPageNumber(i);
+                if (i === currentState.currentPage) {
+                    pageNumber.classList.add('bg-blue-500', 'text-white');
+                    pageNumber.classList.remove('hover:bg-gray-100');
+                }
+                elements.pageNumbers.appendChild(pageNumber);
+            }
+            
+            // Add last page and ellipsis if needed
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.className = 'px-3 py-1';
+                    ellipsis.textContent = '...';
+                    elements.pageNumbers.appendChild(ellipsis);
+                }
+                
+                const lastPage = createPageNumber(totalPages);
+                elements.pageNumbers.appendChild(lastPage);
+            }
+        }
+        
+        // Create a page number element
+        function createPageNumber(page) {
+            const pageNumber = document.createElement('button');
+            pageNumber.className = 'px-3 py-1 border rounded text-gray-700 bg-gray-50 hover:bg-gray-100';
+            pageNumber.textContent = page;
+            
+            if (page !== currentState.currentPage) {
+                pageNumber.addEventListener('click', () => {
+                    currentState.currentPage = page;
+                    renderInventoryTable();
+                });
+            }
+            
+            return pageNumber;
+        }
+        
+        // Show item details in modal
+        function showItemDetails(item) {
+            currentState.selectedItem = item;
+            
+            elements.modalItemName.textContent = item.name;
+            elements.modalCompany.textContent = item.company;
+            elements.modalCost.textContent = `$${item.cost.toFixed(2)}`;
+            elements.modalDate.textContent = new Date(item.date).toLocaleDateString();
+            elements.modalDescription.textContent = item.description || 'No description available';
+            
+            // Simple QR code representation (in a real app, you'd use a QR code library)
+            elements.modalQrCode.innerHTML = `
+                <div class="text-center">
+                    <div class="mb-2 text-xs text-gray-500">Barcode: ${item.barcode}</div>
+                    <div class="inline-block p-2 bg-white border border-gray-300">
+                        <div class="grid grid-cols-5 gap-1">
+                            ${Array(25).fill().map((_, i) => 
+                                `<div class="w-4 h-4 ${Math.random() > 0.3 ? 'bg-black' : 'bg-white'}"></div>`
+                            ).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            elements.itemModal.classList.remove('hidden');
+        }
+        
+        // Add new item
+        function addNewItem() {
+            if (!elements.addItemForm.checkValidity()) {
+                elements.addItemForm.reportValidity();
+                return;
+            }
+            
+            const newItem = {
+                id: Math.max(...inventoryData.map(item => item.id)) + 1,
+                name: elements.newItemName.value,
+                company: elements.newCompany.value,
+                cost: parseFloat(elements.newCost.value),
+                barcode: elements.newBarcode.value || `BC${Math.floor(Math.random() * 10000)}`,
+                date: new Date().toISOString().split('T')[0],
+                description: elements.newDescription.value
+            };
+            
+            inventoryData.unshift(newItem);
+            elements.addItemModal.classList.add('hidden');
+            renderInventoryTable();
+        }
+        
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

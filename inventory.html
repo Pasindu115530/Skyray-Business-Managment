@@ -48,11 +48,15 @@
         }
         
         .sidebar {
-            transform: translateX(-100%); /* Hidden by default */
             transition: all 0.3s ease;
         }
-        .sidebar.active {
-            transform: translateX(0); /* Visible when 'active' class is added */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
         }
     </style>
 </head>
@@ -115,6 +119,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
     </button>
+    
     <div class="md:ml-64 min-h-screen">
         <!-- Header -->
         <header class="bg-white shadow-sm">

@@ -28,6 +28,17 @@
         .filter-dropdown:hover {
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -255,6 +266,8 @@
         const thisMonthItemsEl = document.getElementById('thisMonthItems');
         const avgMonthlyEl = document.getElementById('avgMonthly');
         const currentFilterDisplay = document.getElementById('currentFilterDisplay');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.querySelector('.sidebar');
         
         // Initialize the app
         document.addEventListener('DOMContentLoaded', function() {
@@ -267,6 +280,15 @@
                 populateYearFilter();
                 renderDataTable();
             }
+              // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const sidebar = document.querySelector('.sidebar');
+
+            mobileMenuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+            });
+        });
             
             // Set up event listeners
             yearFilter.addEventListener('change', filterData);
@@ -488,7 +510,12 @@
             monthFilter.value = 'all';
             filterData();
         }
-        
+        // Toggle mobile menu
+        mobileMenuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+
+
         // Function to populate year filter dropdown
         function populateYearFilter() {
             // Get unique years from data

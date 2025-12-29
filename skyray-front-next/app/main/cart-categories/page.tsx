@@ -127,7 +127,7 @@ export default function CartCategoriesPage() {
               Can&apos;t find what you&apos;re looking for? Request a custom quotation for specialized products.
             </p>
             <motion.button
-              onClick={() => router.push('/quotation')}
+              onClick={() => router.push('/main/quotation')}
               className="px-8 py-3 bg-gradient-to-r from-blue-600 to-orange-500 text-white rounded-lg hover:shadow-lg transition-all"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}

@@ -246,9 +246,9 @@ export default function ContactPage() {
                   <div>
                     <h3 className="text-lg text-gray-900 mb-1">Visit Us</h3>
                     <p className="text-gray-600">
-                      123 Engineering Boulevard<br />
-                      Industrial City, EC 12345<br />
-                      United States
+                      No. 32,<br />
+                      Attanagalla Road<br />
+                      Veyangoda
                     </p>
                   </div>
                 </motion.div>
@@ -263,9 +263,9 @@ export default function ContactPage() {
                   <div>
                     <h3 className="text-lg text-gray-900 mb-1">Call Us</h3>
                     <p className="text-gray-600">
-                      Main: +1 (555) 123-4567<br />
-                      Support: +1 (555) 123-4568<br />
-                      Emergency: +1 (555) 911-1234
+                      Main: +94 76 660 4800<br />
+                      Support: +94 77 793 2376<br />
+                     
                     </p>
                   </div>
                 </motion.div>
@@ -280,9 +280,9 @@ export default function ContactPage() {
                   <div>
                     <h3 className="text-lg text-gray-900 mb-1">Email Us</h3>
                     <p className="text-gray-600">
-                      General: info@skyray.com<br />
-                      Sales: sales@skyray.com<br />
-                      Support: support@skyray.com
+                      General: info@sreng.lk<br />
+                      Sales: sales@sreng.lk<br />
+                      Support: skyray@sreng.lk
                     </p>
                   </div>
                 </motion.div>
@@ -300,7 +300,7 @@ export default function ContactPage() {
                       Monday - Friday: 8:00 AM - 6:00 PM<br />
                       Saturday: 9:00 AM - 4:00 PM<br />
                       Sunday: Closed<br />
-                      Emergency: 24/7
+             
                     </p>
                   </div>
                 </motion.div>
@@ -311,25 +311,30 @@ export default function ContactPage() {
       </section>
 
       {/* Map Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="relative h-96 bg-gray-200 rounded-2xl overflow-hidden"
-          >
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <MapPin className="w-16 h-16 text-[#8B1538] mx-auto mb-4" />
-                <p className="text-xl text-gray-600">Interactive Map</p>
-                <p className="text-gray-500">Map placeholder</p>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+<section className="py-16 bg-white">
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6 }}
+      className="relative h-96 bg-gray-100 rounded-2xl overflow-hidden shadow-inner border border-gray-200"
+    >
+      {/* The iframe should be absolute inset-0 to fill the entire 
+          motion.div container perfectly without showing gaps.
+      */}
+      <iframe
+        title="Skyray Engineering Solutions Location"
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126668.95243455091!2d79.97448669277954!3d7.194572397114055!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae2fd7e3aa20e45%3A0x467458d7e19ef2f4!2sSkyray%20Engineering%20Solutins%20(Pvt)%20Ltd.!5e0!3m2!1sen!2slk!4v1767013581615!5m2!1sen!2slk"
+        className="absolute inset-0 w-full h-full"
+        style={{ border: 0 }}
+        allowFullScreen={true}
+        loading="lazy"
+        referrerPolicy="no-referrer-when-downgrade"
+      />
+    </motion.div>
+  </div>
+</section>
 
       {/* Electric Pulse Divider */}
       <div className="relative h-1 bg-gradient-to-r from-transparent via-[#8B1538] to-transparent">

@@ -6,7 +6,7 @@ import { Target, Eye, Award, Users, Zap, Shield, TrendingUp, Heart } from 'lucid
 
 export default function AboutPage() {
   const milestones = [
-    { year: '2010', title: 'Company Founded', description: 'Started with a vision to revolutionize electrical engineering' },
+    { year: '2020', title: 'Company Founded', description: 'Started with a vision to revolutionize electrical engineering' },
     { year: '2013', title: 'First Major Project', description: 'Completed 10MW power distribution system' },
     { year: '2016', title: 'Expansion', description: 'Opened three new regional offices' },
     { year: '2019', title: 'Industry Recognition', description: 'Won National Engineering Excellence Award' },

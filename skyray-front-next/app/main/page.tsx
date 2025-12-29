@@ -18,7 +18,7 @@ export default function Home() {
   // Handle category click using Next.js routing
   const handleSelectCategory = (categoryId: string) => {
     // In Next.js, we pass data via URL parameters or Global Context
-    router.push(`/product-listing?category=${categoryId}`);
+    router.push(`/main/product-listing?category=${categoryId}`);
   };
 
   useEffect(() => {
@@ -203,7 +203,7 @@ export default function Home() {
             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
           >
             <motion.button
-              onClick={() =>  router.push('/services')}
+              onClick={() =>  router.push('/main/services')}
               className="group relative px-8 py-4 bg-gradient-to-r from-[#8B1538] to-[#D4AF37] text-white rounded-lg overflow-hidden"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -221,7 +221,7 @@ export default function Home() {
             </motion.button>
 
             <motion.button
-              onClick={() =>  router.push('/quotation')}
+              onClick={() =>  router.push('/main/quotation')}
               className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-lg border border-white/20 hover:bg-white/20 transition-all"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -230,7 +230,7 @@ export default function Home() {
             </motion.button>
 
             <motion.button
-              onClick={() => router.push('/projects')}
+              onClick={() => router.push('/main/projects')}
               className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-lg border border-white/20 hover:bg-white/20 transition-all"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}

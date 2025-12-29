@@ -39,7 +39,7 @@ function ProductContent() {
         <div className="text-center">
           <h2 className="text-2xl text-gray-900 mb-4">Category not found</h2>
           <Link
-            href="/cart-categories"
+            href="/main/cart-categories"
             className="text-blue-600 hover:text-blue-700"
           >
             ← Back to Categories

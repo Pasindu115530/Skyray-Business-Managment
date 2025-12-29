@@ -19,7 +19,7 @@ export default function ServiceDetailPage() {
       <div className="min-h-screen pt-20 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl text-gray-900 mb-4">Service not found</h2>
-          <Link href="/services" className="text-blue-600 hover:text-blue-700">
+          <Link href="/main/services" className="text-blue-600 hover:text-blue-700">
             ← Back to Services
           </Link>
         </div>
@@ -44,7 +44,7 @@ export default function ServiceDetailPage() {
         <div className="absolute inset-0 flex items-center">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
             <button
-              onClick={() => router.push('/services')}
+              onClick={() => router.push('/main/services')}
               className="flex items-center text-white/80 hover:text-white mb-6 transition-colors"
             >
               <ArrowLeft className="w-5 h-5 mr-2" />
@@ -104,7 +104,7 @@ export default function ServiceDetailPage() {
                 <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl p-6 text-white">
                   <h3 className="text-2xl mb-4">Interested?</h3>
                   <button
-                    onClick={() => router.push('/quotation')}
+                    onClick={() => router.push('/main/quotation')}
                     className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-all"
                   >
                     Request Quotation
@@ -120,7 +120,7 @@ export default function ServiceDetailPage() {
                       .map((relatedService) => (
                         <button
                           key={relatedService.id}
-                          onClick={() => router.push(`/services/${relatedService.id}`)}
+                          onClick={() => router.push(`/main/services/${relatedService.id}`)}
                           className="w-full text-left p-3 bg-white rounded-lg hover:shadow-md transition-all text-sm"
                         >
                           {relatedService.title}

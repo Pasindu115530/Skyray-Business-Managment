@@ -75,11 +75,28 @@ export default function Footer() {
           {/* Services */}
           <div>
             <h3 className="text-lg mb-4 text-[#D4AF37]">Our Services</h3>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li>Electrical Installations</li>
-              <li>Industrial Power Systems</li>
-              <li>Automation Solutions</li>
-              <li>Maintenance & Support</li>
+            <ul className="space-y-2">
+              {[
+                { label: 'Industrial Automation', href: '/main/services/industrial-automation' },
+                { label: 'Motor Control Panels', href: '/main/services/motor-control-panels' },
+                { label: 'Earthing Lightning Protection', href: '/main/services/earthing-lightning-protection' },
+                { label: 'Pneumatic Systems', href: '/main/services/pneumatic-systems' },
+                { label: 'Energy Efficiency', href: '/main/services/energy-efficiency' },
+                { label: 'Technical Consulting', href: '/main/services/technical-consulting' },
+                { label: 'Industrial Training', href: '/main/services/industrial-training' },
+                { label: 'Software Solutions', href: '/main/services/software-solutions' },
+              ].map((item) => (
+                <li key={item.href}>
+                  <Link href={item.href} className="block group">
+                    <motion.span
+                      className="inline-block text-gray-400 group-hover:text-[#D4AF37] transition-colors text-sm"
+                      whileHover={{ x: 5 }}
+                    >
+                      {item.label}
+                    </motion.span>
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 

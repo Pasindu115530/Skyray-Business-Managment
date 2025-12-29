@@ -11,7 +11,7 @@ export default function ServicesPage() {
 
   // Function to handle service selection via URL
   const handleSelectService = (serviceId: string) => {
-    router.push(`/services/${serviceId}`);
+    router.push(`/main/services/${serviceId}`);
   };
 
   return (
@@ -130,7 +130,7 @@ export default function ServicesPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <motion.button
-                onClick={() => router.push('/cart-categories')}
+                onClick={() => router.push('/main/cart-categories')}
                 className="px-8 py-4 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-all"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -138,7 +138,7 @@ export default function ServicesPage() {
                 Browse Products
               </motion.button>
               <motion.button
-                onClick={() => router.push('/quotation')}
+                onClick={() => router.push('/main/quotation')}
                 className="px-8 py-4 bg-white text-blue-600 rounded-lg hover:bg-gray-100 transition-all"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}

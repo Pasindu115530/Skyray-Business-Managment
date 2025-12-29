@@ -433,7 +433,7 @@ export default function Home() {
               Get in touch with our expert team today and discover how we can help you achieve excellence
             </p>
             <motion.button
-              onClick={() => router.push('/contact')}
+              onClick={() => router.push('/main/contact')}
               className="px-8 py-4 bg-gradient-to-r from-[#8B1538] to-[#D4AF37] text-white rounded-lg"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}

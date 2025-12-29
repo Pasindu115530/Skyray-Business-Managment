@@ -66,7 +66,7 @@ export default function AboutPage() {
               About <span className="bg-gradient-to-r from-[#8B1538] to-[#D4AF37] bg-clip-text text-transparent">SkyRay</span>
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Engineering excellence since 2010. Powering industries with innovative electrical solutions and unwavering commitment to quality.
+              Engineering excellence since 2020. Powering industries with innovative electrical solutions and unwavering commitment to quality.
             </p>
           </motion.div>
         </div>
@@ -89,7 +89,7 @@ export default function AboutPage() {
               </div>
               <h2 className="text-3xl mb-4 text-gray-900">Our Mission</h2>
               <p className="text-gray-600 leading-relaxed">
-                To provide innovative, reliable, and sustainable electrical engineering solutions that empower businesses and industries to achieve operational excellence while maintaining the highest standards of safety and quality.
+               We supply equipment and accessories required for engineering works. To improve the efficiency of the production process in factories and the quality of products, we also specialize in the automation of machines. Additionally, we design and supply new machines and the necessary accessories and equipment.
               </p>
             </motion.div>
 
@@ -106,7 +106,9 @@ export default function AboutPage() {
               </div>
               <h2 className="text-3xl mb-4 text-gray-900">Our Vision</h2>
               <p className="text-gray-600 leading-relaxed">
-                To be the leading electrical engineering company recognized globally for innovation, excellence, and transformative solutions that shape the future of industrial power systems and automation.
+                We are committed to helping our customers find engineering solutions that deliver immediate and long-term, bottom-line results.
+
+
               </p>
             </motion.div>
           </div>

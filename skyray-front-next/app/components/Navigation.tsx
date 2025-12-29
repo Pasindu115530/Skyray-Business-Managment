@@ -12,7 +12,7 @@ import logo from '@/public/skyraylogo.jpg';
 // These values should eventually come from your Context Providers.
 interface NavigationProps {
   user: { name: string } | null;
-  onLogout: () => void;
+  onLogout?: () => void; // Now it is optional
   cartCount: number;
 }
 
@@ -88,7 +88,10 @@ export default function Navigation({ user, onLogout, cartCount }: NavigationProp
                   <User className="w-4 h-4 text-[#8B1538]" />
                   <span className="text-sm text-gray-700">{user.name}</span>
                 </div>
-                <button onClick={onLogout} className="p-2 text-gray-700 hover:text-[#8B1538]">
+                <button 
+                  onClick={() => onLogout?.()} // Added optional chaining to safely call if it exists
+                  className="p-2 text-gray-700 hover:text-[#8B1538]"
+                >
                   <LogOut className="w-5 h-5" />
                 </button>
               </>

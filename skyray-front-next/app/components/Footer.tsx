@@ -51,12 +51,12 @@ export default function Footer() {
             <h3 className="text-lg mb-4 text-[#D4AF37]">Quick Links</h3>
             <ul className="space-y-2">
               {[
-                { label: 'Home', href: '/' },
-                { label: 'About Us', href: '/about' },
-                { label: 'Our Services', href: '/services' },
-                { label: 'Projects', href: '/projects' },
-                { label: 'Gallery', href: '/gallery' },
-                { label: 'Contact', href: '/contact' },
+                { label: 'Home', href: '/main' },
+                { label: 'About Us', href: '/main/about' },
+                { label: 'Our Services', href: '/main/services' },
+                { label: 'Projects', href: '/main/projects' },
+                { label: 'Gallery', href: '/main/gallery' },
+                { label: 'Contact', href: '/main/contact' },
               ].map((item) => (
                 <li key={item.href}>
                   <Link href={item.href} className="block group">

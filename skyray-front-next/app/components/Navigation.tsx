@@ -21,12 +21,12 @@ export default function Navigation({ user, onLogout, cartCount }: NavigationProp
   const pathname = usePathname(); // Replaces 'currentPage' prop
 
   const navItems = [
-    { label: 'Home', href: '/' },
-    { label: 'About Us', href: '/about' },
-    { label: 'Our Services', href: '/services' },
-    { label: 'Projects', href: '/projects' },
-    { label: 'Gallery', href: '/gallery' },
-    { label: 'Contact', href: '/contact' },
+    { label: 'Home', href: '/main' },
+    { label: 'About Us', href: '/main/about' },
+    { label: 'Our Services', href: '/main/services' },
+    { label: 'Projects', href: '/main/projects' },
+    { label: 'Gallery', href: '/main/gallery' },
+    { label: 'Contact', href: '/main/contact' },
   ];
 
   return (
@@ -35,7 +35,7 @@ export default function Navigation({ user, onLogout, cartCount }: NavigationProp
         <div className="flex justify-between items-center h-20">
           
           {/* Logo with Next.js Link */}
-          <Link href="/" className="flex items-center cursor-pointer">
+          <Link href="/main" className="flex items-center cursor-pointer">
             <Image
               src={logo}
               alt="SkyRay Engineering Solutions"
@@ -73,10 +73,10 @@ export default function Navigation({ user, onLogout, cartCount }: NavigationProp
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
               <>
-                <Link href="/quotation" className="px-4 py-2 text-[#8B1538] hover:text-[#D4AF37]">
+                <Link href="/main/quotation" className="px-4 py-2 text-[#8B1538] hover:text-[#D4AF37]">
                   Request Quote
                 </Link>
-                <Link href="/cart" className="relative p-2 text-gray-700 hover:text-[#8B1538]">
+                <Link href="/main/cart" className="relative p-2 text-gray-700 hover:text-[#8B1538]">
                   <ShoppingCart className="w-5 h-5" />
                   {cartCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-[#8B1538] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">

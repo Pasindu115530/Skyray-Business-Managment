@@ -12,7 +12,7 @@ export default function CartCategoriesPage() {
   // Replaces onSelectCategory state switcher
   const handleSelectCategory = (categoryId: string) => {
     // Navigate using query parameters
-    router.push(`/product-listing?category=${categoryId}`);
+    router.push(`/main/product-listing?category=${categoryId}`);
   };
 
   return (

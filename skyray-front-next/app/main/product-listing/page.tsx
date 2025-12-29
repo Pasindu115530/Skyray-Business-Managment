@@ -55,7 +55,7 @@ function ProductContent() {
       <section className="bg-gradient-to-r from-blue-600 to-blue-800 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <button
-            onClick={() => router.push('/cart-categories')}
+            onClick={() => router.push('/main/cart-categories')}
             className="flex items-center text-white/80 hover:text-white mb-6 transition-colors"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />

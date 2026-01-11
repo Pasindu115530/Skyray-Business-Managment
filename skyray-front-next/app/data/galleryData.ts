@@ -10,7 +10,7 @@ export const galleryData: GalleryImage[] = [
   // Projects
   {
     id: 'proj-1',
-    url: 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=1200',
+    url: 'https://sreng.lk/gallery/img_6881031d021666.54080826.jpg',
     category: 'Projects',
     title: 'Factory Automation Project',
     description: 'Complete automation system installation',

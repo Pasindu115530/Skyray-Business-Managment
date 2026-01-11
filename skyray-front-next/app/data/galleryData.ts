@@ -24,7 +24,7 @@ export const galleryData: GalleryImage[] = [
   },
   {
     id: 'proj-3',
-    url: 'https://images.unsplash.com/photo-1581092335397-9583eb92d232?w=1200',
+    url: 'https://sreng.lk/gallery/img_674eec3ee52a97.12848932.jpg',
     category: 'Projects',
     title: 'Manufacturing Plant Upgrade',
     description: 'Complete electrical system modernization',

@@ -17,7 +17,7 @@ export const galleryData: GalleryImage[] = [
   },
   {
     id: 'proj-2',
-    url: 'https://images.unsplash.com/photo-1581092160607-ee67e0e62837?w=1200',
+    url: 'https://sreng.lk/gallery/img_6748ac7f689cf0.19747301.jpeg',
     category: 'Projects',
     title: 'Industrial Power Distribution',
     description: 'Large-scale power distribution system',

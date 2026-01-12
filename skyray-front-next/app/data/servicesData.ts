@@ -13,7 +13,7 @@ export const servicesData: Service[] = [
     id: 'industrial-automation',
     title: 'Industrial Automation System & Equipment',
     description: 'Automating your systems with precision and reliability.',
-    image: 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=800',
+    image: 'https://sreng.lk/projects/industry_control.jpg',
     detailedDescription: 'Our industrial automation solutions integrate cutting-edge technology with proven engineering practices to deliver systems that enhance productivity, reduce operational costs, and improve safety. We design, implement, and maintain automation systems tailored to your specific industrial requirements, ensuring seamless integration with existing infrastructure.',
     keyFeatures: [
       'PLC Programming and Integration',
@@ -36,7 +36,7 @@ export const servicesData: Service[] = [
     id: 'motor-control-panels',
     title: 'Motor Control & Power Distribution Panels',
     description: 'Efficient, safe, and durable power distribution systems.',
-    image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=800',
+    image: 'https://sreng.lk/projects/motor_control.webp',
     detailedDescription: 'We design and manufacture custom motor control and power distribution panels that meet the highest industry standards. Our panels are engineered for reliability, safety, and ease of maintenance, incorporating advanced protective devices and control systems.',
     keyFeatures: [
       'Custom Panel Design and Manufacturing',
@@ -59,7 +59,7 @@ export const servicesData: Service[] = [
     id: 'power-factor-correction',
     title: 'Power Factor Corrections',
     description: 'Improving energy efficiency and reducing costs with power factor corrections.',
-    image: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800',
+    image: 'https://sreng.lk/projects/power_factor.jpg',
     detailedDescription: 'Power factor correction is essential for optimizing electrical system efficiency and reducing energy costs. Our solutions include capacitor banks, automatic power factor correction panels, and harmonic filters designed to improve power quality and reduce utility penalties.',
     keyFeatures: [
       'Automatic Power Factor Correction Panels',
@@ -82,7 +82,7 @@ export const servicesData: Service[] = [
     id: 'earthing-lightning-protection',
     title: 'Earthing, Lightning, and Surge Protection',
     description: 'Protect your assets with our state-of-the-art earthing solutions.',
-    image: 'https://images.unsplash.com/photo-1581092160607-ee67e0e62837?w=800',
+    image: 'https://sreng.lk/projects/earthing_lightning.jpg',
     detailedDescription: 'Comprehensive protection systems designed to safeguard personnel, equipment, and structures from electrical faults, lightning strikes, and power surges. Our solutions comply with international standards and are customized to your facility\'s specific requirements.',
     keyFeatures: [
       'Earthing System Design and Installation',
@@ -105,7 +105,7 @@ export const servicesData: Service[] = [
     id: 'pneumatic-systems',
     title: 'Pneumatic & Electro Pneumatic Systems',
     description: 'We design and implement pneumatic systems tailored to your needs.',
-    image: 'https://images.unsplash.com/photo-1581092335397-9583eb92d232?w=800',
+    image: 'https://sreng.lk/projects/pnemuatic.jpg',
     detailedDescription: 'Our pneumatic and electro-pneumatic solutions provide reliable, efficient, and cost-effective motion control for industrial applications. We design complete systems from air preparation to actuator control, ensuring optimal performance and longevity.',
     keyFeatures: [
       'Pneumatic Circuit Design',
@@ -128,7 +128,7 @@ export const servicesData: Service[] = [
     id: 'energy-efficiency',
     title: 'Energy Efficiency and Management Solutions',
     description: 'Optimizing energy use to enhance sustainability.',
-    image: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=800',
+    image: 'https://sreng.lk/projects/power_solor.jpg',
     detailedDescription: 'Comprehensive energy management solutions that help you monitor, analyze, and optimize energy consumption across your facility. Our systems provide actionable insights to reduce costs and improve sustainability.',
     keyFeatures: [
       'Energy Monitoring Systems',
@@ -151,7 +151,7 @@ export const servicesData: Service[] = [
     id: 'technical-consulting',
     title: 'Technical Consulting and Application Solutions',
     description: 'Providing tailored consulting services for your industrial needs.',
-    image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800',
+    image: 'https://sreng.lk/projects/councling.jpg',
     detailedDescription: 'Expert consulting services to help you navigate complex industrial challenges. Our experienced engineers provide customized solutions, feasibility studies, system optimization, and technical support throughout your project lifecycle.',
     keyFeatures: [
       'System Design and Engineering',
@@ -174,7 +174,7 @@ export const servicesData: Service[] = [
     id: 'industrial-training',
     title: 'Industrial Training',
     description: 'Training for industry professionals to excel in their fields.',
-    image: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800',
+    image: 'https://sreng.lk/projects/industry.jpg',
     detailedDescription: 'Comprehensive training programs designed to enhance the skills and knowledge of your workforce. Our hands-on courses cover automation, electrical systems, safety protocols, and emerging technologies in industrial engineering.',
     keyFeatures: [
       'PLC Programming Courses',

@@ -82,7 +82,7 @@ export const servicesData: Service[] = [
     id: 'earthing-lightning-protection',
     title: 'Earthing, Lightning, and Surge Protection',
     description: 'Protect your assets with our state-of-the-art earthing solutions.',
-    image: 'https://sreng.lk/projects/earthing_lightning.jpg',
+    image: 'https://sreng.lk/projects/Lightning-Protection.jpg',
     detailedDescription: 'Comprehensive protection systems designed to safeguard personnel, equipment, and structures from electrical faults, lightning strikes, and power surges. Our solutions comply with international standards and are customized to your facility\'s specific requirements.',
     keyFeatures: [
       'Earthing System Design and Installation',

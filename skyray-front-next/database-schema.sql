@@ -79,8 +79,28 @@ INSERT INTO projects (title, description, client_name, status, start_date, budge
 ('SEO Campaign', 'Complete SEO optimization', 'Mike Johnson', 'completed', '2025-12-01', 75000.00, 3),
 ('Website Maintenance', 'Ongoing website support', 'John Doe', 'in-progress', '2026-01-15', 50000.00, 6);
 
+-- Gallery images table
+CREATE TABLE IF NOT EXISTS gallery_images (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  image_url VARCHAR(500) NOT NULL,
+  category VARCHAR(100) DEFAULT 'projects',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Insert sample gallery images
+INSERT INTO gallery_images (title, description, image_url, category) VALUES 
+('Modern Office Design', 'Contemporary office space with ergonomic furniture', '/gallery/office1.jpg', 'office'),
+('Team Building Event', 'Annual team building activity at resort', '/gallery/team1.jpg', 'events'),
+('E-commerce Website', 'Fully responsive e-commerce platform', '/gallery/project1.jpg', 'projects'),
+('Mobile App Interface', 'Clean and modern mobile app UI', '/gallery/project2.jpg', 'projects'),
+('Company Celebration', 'Celebrating 5 years of success', '/gallery/event2.jpg', 'events');
+
 -- Create indexes for better performance
 CREATE INDEX idx_quotations_status ON quotations(status);
 CREATE INDEX idx_quotations_created_at ON quotations(created_at);
 CREATE INDEX idx_users_role ON users(role);
 CREATE INDEX idx_projects_status ON projects(status);
+CREATE INDEX idx_gallery_category ON gallery_images(category);

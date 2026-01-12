@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { 
   BarChart, 
   Bar, 
@@ -35,35 +36,26 @@ interface DashboardStats {
 
 const COLORS = ['#10b981', '#f59e0b', '#ef4444', '#6b7280'];
 
+// Fake data for dashboard
+const fakeDashboardStats: DashboardStats = {
+  totalQuotations: 45,
+  pendingQuotations: 12,
+  approvedQuotations: 28,
+  rejectedQuotations: 5,
+  totalCustomers: 156,
+  totalRevenue: 2850000,
+  recentQuotations: [
+    { id: 1, customerName: 'John Doe', email: 'john@example.com', service: 'Web Development', status: 'approved', amount: 150000, createdAt: '2026-01-10' },
+    { id: 2, customerName: 'Jane Smith', email: 'jane@example.com', service: 'Mobile App', status: 'pending', amount: 250000, createdAt: '2026-01-09' },
+    { id: 3, customerName: 'Mike Johnson', email: 'mike@example.com', service: 'Digital Marketing', status: 'approved', amount: 75000, createdAt: '2026-01-08' },
+    { id: 4, customerName: 'Sarah Williams', email: 'sarah@example.com', service: 'Cloud Services', status: 'pending', amount: 120000, createdAt: '2026-01-07' },
+    { id: 5, customerName: 'David Brown', email: 'david@example.com', service: 'UI/UX Design', status: 'rejected', amount: 80000, createdAt: '2026-01-06' },
+  ]
+};
+
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalQuotations: 0,
-    pendingQuotations: 0,
-    approvedQuotations: 0,
-    rejectedQuotations: 0,
-    totalCustomers: 0,
-    totalRevenue: 0,
-    recentQuotations: []
-  });
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  const fetchDashboardData = async () => {
-    try {
-      const response = await fetch('/api/admin/dashboard');
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data);
-      }
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [stats] = useState<DashboardStats>(fakeDashboardStats);
+  const [loading] = useState(false);
 
   const quotationChartData = [
     { name: 'Approved', value: stats.approvedQuotations },
@@ -102,13 +94,65 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-gray-600 mt-2">Overview of quotations and customer statistics</p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Admin Navigation Bar */}
+      <nav className="bg-gradient-to-r from-blue-600 to-blue-800 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <h1 className="text-white text-2xl font-bold">Skyray Admin</h1>
+              </div>
+              <div className="ml-10 flex items-baseline space-x-4">
+                <Link
+                  href="/"
+                  className="bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  href="/admin/projects"
+                  className="text-blue-100 hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  Projects
+                </Link>
+                <Link
+                  href="/admin/customers"
+                  className="text-blue-100 hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  Customers
+                </Link>
+                <Link
+                  href="/admin/gallery"
+                  className="text-blue-100 hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  Gallery Photos
+                </Link>
+                <Link
+                  href="/admin/settings"
+                  className="text-blue-100 hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  Settings
+                </Link>
+              </div>
+            </div>
+            <div className="flex items-center">
+              <button className="text-white hover:text-blue-100 px-3 py-2 rounded-md text-sm font-medium">
+                Logout
+              </button>
+            </div>
+          </div>
         </div>
+      </nav>
+
+      {/* Main Content */}
+      <div className="p-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+            <p className="text-gray-600 mt-2">Overview of quotations and customer statistics</p>
+          </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -303,17 +347,18 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200">
-            View All Quotations
-          </button>
-          <button className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200">
-            Manage Customers
-          </button>
-          <button className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200">
-            Generate Report
-          </button>
+          {/* Quick Actions */}
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200">
+              View All Quotations
+            </button>
+            <button className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200">
+              Manage Customers
+            </button>
+            <button className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200">
+              Generate Report
+            </button>
+          </div>
         </div>
       </div>
     </div>

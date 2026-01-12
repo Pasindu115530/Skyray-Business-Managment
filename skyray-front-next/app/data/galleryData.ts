@@ -10,21 +10,21 @@ export const galleryData: GalleryImage[] = [
   // Projects
   {
     id: 'proj-1',
-    url: 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=1200',
+    url: 'https://sreng.lk/gallery/img_6881031d021666.54080826.jpg',
     category: 'Projects',
     title: 'Factory Automation Project',
     description: 'Complete automation system installation',
   },
   {
     id: 'proj-2',
-    url: 'https://images.unsplash.com/photo-1581092160607-ee67e0e62837?w=1200',
+    url: 'https://sreng.lk/gallery/img_6748ac7f689cf0.19747301.jpeg',
     category: 'Projects',
     title: 'Industrial Power Distribution',
     description: 'Large-scale power distribution system',
   },
   {
     id: 'proj-3',
-    url: 'https://images.unsplash.com/photo-1581092335397-9583eb92d232?w=1200',
+    url: 'https://sreng.lk/gallery/img_674eec3ee52a97.12848932.jpg',
     category: 'Projects',
     title: 'Manufacturing Plant Upgrade',
     description: 'Complete electrical system modernization',

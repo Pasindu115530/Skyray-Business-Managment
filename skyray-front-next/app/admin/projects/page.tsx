@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import AdminNavigation from '@/app/components/AdminNavigation';
 
 interface Project {
   id: number;
@@ -83,59 +84,11 @@ export default function AdminProjects() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Admin Navigation Bar */}
-      <nav className="bg-gradient-to-r from-blue-600 to-blue-800 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <h1 className="text-white text-2xl font-bold">Skyray Admin</h1>
-              </div>
-              <div className="ml-10 flex items-baseline space-x-4">
-                <Link
-                  href="/main/admin"
-                  className="text-blue-100 hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  href="/main/admin/projects"
-                  className="bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Projects
-                </Link>
-                <Link
-                  href="/main/admin/customers"
-                  className="text-blue-100 hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                >
-                  Customers
-                </Link>
-                <Link
-                  href="/main/admin/gallery"
-                  className="text-blue-100 hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                >
-                  Gallery Photos
-                </Link>
-                <Link
-                  href="/main/admin/settings"
-                  className="text-blue-100 hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                >
-                  Settings
-                </Link>
-              </div>
-            </div>
-            <div className="flex items-center">
-              <button className="text-white hover:text-blue-100 px-3 py-2 rounded-md text-sm font-medium">
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <AdminNavigation onLogout={() => console.log('Logout')} />
 
       {/* Main Content */}
-      <div className="p-6">
+      <div className="pt-20 md:pt-24 p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-6 flex justify-between items-center">
             <div>

@@ -115,16 +115,19 @@ export default function Navigation({ user, onLogout, cartCount }: NavigationProp
       {/* Mobile Menu Content (Simplified) */}
       {mobileMenuOpen && (
          <div className="md:hidden bg-white border-t px-4 py-4 space-y-3">
-             {navItems.map((item) => (
+             {navItems.map((item) => {
+               const isActive = pathname === item.href;
+               return (
                  <Link 
                     key={item.href} 
                     href={item.href} 
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block px-4 py-2"
+                    className={`block px-4 py-2 ${isActive ? 'text-[#8B1538] font-semibold' : 'text-gray-700'}`}
                  >
                     {item.label}
                  </Link>
-             ))}
+               );
+             })}
          </div>
       )}
     </nav>

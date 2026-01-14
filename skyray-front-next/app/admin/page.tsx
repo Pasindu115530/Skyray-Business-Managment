@@ -55,8 +55,6 @@ const fakeDashboardStats: DashboardStats = {
   ]
 };
 
-const ADMIN_USERNAME = 'admin';
-const ADMIN_PASSWORD = 'admin123'; // Change these to your desired credentials
 
 export default function AdminDashboard() {
   const [stats] = useState<DashboardStats>(fakeDashboardStats);

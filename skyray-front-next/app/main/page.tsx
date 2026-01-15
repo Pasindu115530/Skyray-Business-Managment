@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation'; // Replaces navigateTo
 import logo from '@/public/skyraylogo.jpg'; // Adjust path based on your alias
 import { productCategories } from '../data/productsData';
+import JsonLd from '@/components/JsonLd';
 
 export default function Home() {
   const router = useRouter();
@@ -105,7 +106,7 @@ export default function Home() {
     };
   }, []);
 
-    const features = [
+  const features = [
     {
       icon: Zap,
       title: 'High Performance',
@@ -130,8 +131,45 @@ export default function Home() {
     { icon: Clock, value: '24/7', label: 'Support Available' },
   ];
 
+
+
+  const localBusinessSchema = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "SkyRay Engineering Solutions",
+    "image": "https://www.skyrayengineering.com/skyraylogo.jpg",
+    "telephone": "+94-123-456-789",
+    "url": "https://www.skyrayengineering.com",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "123 Engineering Lane",
+      "addressLocality": "Colombo",
+      "postalCode": "00100",
+      "addressCountry": "LK"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 6.9271,
+      "longitude": 79.8612
+    },
+    "openingHoursSpecification": {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday"
+      ],
+      "opens": "08:00",
+      "closes": "17:00"
+    },
+    "priceRange": "$$"
+  };
+
   return (
     <div className="pt-20">
+      <JsonLd data={localBusinessSchema} />
       {/* Hero Section */}
       <motion.section
         style={{ opacity, scale }}
@@ -203,7 +241,7 @@ export default function Home() {
             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
           >
             <motion.button
-              onClick={() =>  router.push('/main/services')}
+              onClick={() => router.push('/main/services')}
               className="group relative px-8 py-4 bg-gradient-to-r from-[#8B1538] to-[#D4AF37] text-white rounded-lg overflow-hidden"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -221,7 +259,7 @@ export default function Home() {
             </motion.button>
 
             <motion.button
-              onClick={() =>  router.push('/main/quotation')}
+              onClick={() => router.push('/main/quotation')}
               className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-lg border border-white/20 hover:bg-white/20 transition-all"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -265,79 +303,79 @@ export default function Home() {
         </motion.div>
       </motion.section>
       <section className="py-20">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  className="text-center mb-16"
-                >
-                  <h2 className="text-4xl md:text-5xl text-gray-900 mb-4">
-                    Browse by Category
-                  </h2>
-                  <p className="text-xl text-gray-600">
-                    Select a category to view available products
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl text-gray-900 mb-4">
+              Browse by Category
+            </h2>
+            <p className="text-xl text-gray-600">
+              Select a category to view available products
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {productCategories.map((category, index) => (
+              <motion.div
+                key={category.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                whileHover={{ y: -10, scale: 1.03 }}
+                onClick={() => handleSelectCategory(category.id)}
+                className="group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all cursor-pointer"
+              >
+                {/* Background Gradient */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-orange-50 opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                {/* Content */}
+                <div className="relative p-8">
+                  {/* Icon */}
+                  <motion.div
+                    className="text-6xl mb-6"
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    {category.icon}
+                  </motion.div>
+
+                  {/* Title */}
+                  <h3 className="text-2xl text-gray-900 mb-4 group-hover:text-blue-600 transition-colors">
+                    {category.title}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-gray-600 mb-6">
+                    {category.description}
                   </p>
-                </motion.div>
-      
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  {productCategories.map((category, index) => (
-                    <motion.div
-                      key={category.id}
-                      initial={{ opacity: 0, y: 30 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.6, delay: index * 0.1 }}
-                      whileHover={{ y: -10, scale: 1.03 }}
-                      onClick={() => handleSelectCategory(category.id)}
-                      className="group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all cursor-pointer"
-                    >
-                      {/* Background Gradient */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-orange-50 opacity-0 group-hover:opacity-100 transition-opacity" />
-      
-                      {/* Content */}
-                      <div className="relative p-8">
-                        {/* Icon */}
-                        <motion.div
-                          className="text-6xl mb-6"
-                          whileHover={{ rotate: 360 }}
-                          transition={{ duration: 0.6 }}
-                        >
-                          {category.icon}
-                        </motion.div>
-      
-                        {/* Title */}
-                        <h3 className="text-2xl text-gray-900 mb-4 group-hover:text-blue-600 transition-colors">
-                          {category.title}
-                        </h3>
-      
-                        {/* Description */}
-                        <p className="text-gray-600 mb-6">
-                          {category.description}
-                        </p>
-      
-                        {/* Button */}
-                        <motion.div
-                          className="flex items-center text-orange-600 group-hover:text-blue-600 transition-colors"
-                          whileHover={{ x: 5 }}
-                        >
-                          <span className="mr-2">View Items</span>
-                          <ArrowRight className="w-5 h-5" />
-                        </motion.div>
-                      </div>
-      
-                      {/* Bottom Accent */}
-                      <motion.div
-                        className="h-2 bg-gradient-to-r from-blue-600 to-orange-500"
-                        initial={{ scaleX: 0 }}
-                        whileHover={{ scaleX: 1 }}
-                        transition={{ duration: 0.3 }}
-                      />
-                    </motion.div>
-                  ))}
+
+                  {/* Button */}
+                  <motion.div
+                    className="flex items-center text-orange-600 group-hover:text-blue-600 transition-colors"
+                    whileHover={{ x: 5 }}
+                  >
+                    <span className="mr-2">View Items</span>
+                    <ArrowRight className="w-5 h-5" />
+                  </motion.div>
                 </div>
-              </div>
-            </section>
+
+                {/* Bottom Accent */}
+                <motion.div
+                  className="h-2 bg-gradient-to-r from-blue-600 to-orange-500"
+                  initial={{ scaleX: 0 }}
+                  whileHover={{ scaleX: 1 }}
+                  transition={{ duration: 0.3 }}
+                />
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Features Section */}
       <section className="py-20 bg-white">

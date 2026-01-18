@@ -1,23 +1,60 @@
-"use client"; 
+"use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Image, X, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
-import { galleryData } from '@/app/data/galleryData';
+
+interface GalleryImage {
+  id: number;
+  url: string;
+  category: string;
+  title: string;
+  description: string;
+}
 
 const categories = ['All', 'Projects', 'Panels', 'Automation', 'Training', 'Installations'];
 
 export default function Gallery() {
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [lightboxImage, setLightboxImage] = useState<typeof galleryData[0] | null>(null);
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [lightboxImage, setLightboxImage] = useState<GalleryImage | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/gallery');
+        if (response.ok) {
+          const data = await response.json();
+          // Map backend data to frontend interface
+          const mappedData = data.map((item: any) => ({
+            id: item.id,
+            url: item.image_url,
+            category: item.category,
+            title: item.title,
+            description: item.description || '',
+          }));
+          setGalleryImages(mappedData);
+        } else {
+          console.error('Failed to fetch images');
+        }
+      } catch (error) {
+        console.error('Error fetching images:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchImages();
+  }, []);
 
   const filteredImages =
     selectedCategory === 'All'
-      ? galleryData
-      : galleryData.filter((img) => img.category === selectedCategory);
+      ? galleryImages
+      : galleryImages.filter((img) => img.category === selectedCategory);
 
-  const openLightbox = (image: typeof galleryData[0], index: number) => {
+  const openLightbox = (image: GalleryImage, index: number) => {
     setLightboxImage(image);
     setLightboxIndex(index);
   };
@@ -37,6 +74,14 @@ export default function Gallery() {
     setLightboxImage(filteredImages[prevIndex]);
     setLightboxIndex(prevIndex);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
+        <div className="text-xl text-gray-600">Loading gallery...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="pt-20 min-h-screen bg-gray-50">
@@ -78,11 +123,10 @@ export default function Gallery() {
               <motion.button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-6 py-2 rounded-full transition-all ${
-                  selectedCategory === category
+                className={`px-6 py-2 rounded-full transition-all ${selectedCategory === category
                     ? 'bg-gradient-to-r from-blue-600 to-orange-500 text-white shadow-lg'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                  }`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >

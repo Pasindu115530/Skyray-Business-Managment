@@ -9,56 +9,103 @@ interface GalleryImage {
   id: number;
   title: string;
   description: string;
-  imageUrl: string;
+  image_url: string;
   category: string;
-  createdAt: string;
+  created_at: string;
 }
 
-// Fake gallery data
-const fakeGalleryImages: GalleryImage[] = [
-  { id: 1, title: 'Modern Office Design', description: 'Contemporary office space with ergonomic furniture', imageUrl: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400', category: 'office', createdAt: '2026-01-01' },
-  { id: 2, title: 'Team Building Event', description: 'Annual team building activity', imageUrl: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=400', category: 'events', createdAt: '2026-01-02' },
-  { id: 3, title: 'E-commerce Website', description: 'Fully responsive online store', imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400', category: 'projects', createdAt: '2026-01-03' },
-  { id: 4, title: 'Mobile App Interface', description: 'Clean and modern app design', imageUrl: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400', category: 'projects', createdAt: '2026-01-04' },
-  { id: 5, title: 'Company Celebration', description: 'Celebrating project success', imageUrl: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=400', category: 'events', createdAt: '2026-01-05' },
-  { id: 6, title: 'Product Launch', description: 'New product unveiling event', imageUrl: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=400', category: 'products', createdAt: '2026-01-06' },
-];
-
 export default function AdminGallery() {
-  const [images, setImages] = useState<GalleryImage[]>(fakeGalleryImages);
+  const [images, setImages] = useState<GalleryImage[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    imageUrl: '',
-    category: 'projects'
-  });
+  const [uploading, setUploading] = useState(false);
+
+  // Form State
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [file, setFile] = useState<File | null>(null);
+  const [category, setCategory] = useState('projects');
+
+  const fetchImages = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/gallery');
+      if (response.ok) {
+        const data = await response.json();
+        setImages(data);
+      } else {
+        console.error('Failed to fetch images');
+      }
+    } catch (error) {
+      console.error('Error fetching images:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchImages();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newImage: GalleryImage = {
-      id: images.length + 1,
-      title: formData.title,
-      description: formData.description,
-      imageUrl: formData.imageUrl,
-      category: formData.category,
-      createdAt: new Date().toISOString()
-    };
-    setImages([newImage, ...images]);
-    setShowModal(false);
-    setFormData({
-      title: '',
-      description: '',
-      imageUrl: '',
-      category: 'projects'
-    });
-    alert('Image added successfully!');
+    if (!file) {
+      alert('Please select an image file');
+      return;
+    }
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('image', file);
+    formData.append('category', category);
+
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/gallery', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        alert('Image added successfully!');
+        setShowModal(false);
+        // Reset form
+        setTitle('');
+        setDescription('');
+        setFile(null);
+        setCategory('projects');
+        // Refresh grid
+        fetchImages();
+      } else {
+        const errorData = await response.json();
+        alert('Failed to upload image: ' + JSON.stringify(errorData));
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('An error occurred while uploading.');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const deleteImage = async (id: number) => {
     if (!confirm('Are you sure you want to delete this image?')) return;
-    setImages(images.filter(img => img.id !== id));
-    alert('Image deleted successfully!');
+
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/gallery/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setImages(images.filter(img => img.id !== id));
+        alert('Image deleted successfully!');
+      } else {
+        alert('Failed to delete image');
+      }
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      alert('An error occurred while deleting.');
+    }
   };
 
   return (
@@ -82,35 +129,39 @@ export default function AdminGallery() {
           </div>
 
           {/* Gallery Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {images.map((image) => (
-              <div key={image.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
-                <div className="relative h-48 bg-gray-200">
-                  <Image
-                    src={image.imageUrl}
-                    alt={image.title}
-                    fill
-                    className="object-cover"
-                  />
-                  <span className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
-                    {image.category}
-                  </span>
+          {loading ? (
+            <div className="text-center py-12">Loading gallery...</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {images.map((image) => (
+                <div key={image.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+                  <div className="relative h-48 bg-gray-200">
+                    <Image
+                      src={image.image_url}
+                      alt={image.title}
+                      fill
+                      className="object-cover"
+                    />
+                    <span className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
+                      {image.category}
+                    </span>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-semibold text-gray-900 mb-2">{image.title}</h3>
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{image.description}</p>
+                    <button
+                      onClick={() => deleteImage(image.id)}
+                      className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-gray-900 mb-2">{image.title}</h3>
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">{image.description}</p>
-                  <button
-                    onClick={() => deleteImage(image.id)}
-                    className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
-          {images.length === 0 && (
+          {!loading && images.length === 0 && (
             <div className="text-center py-12">
               <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -143,8 +194,8 @@ export default function AdminGallery() {
                   <input
                     type="text"
                     required
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Enter photo title"
                   />
@@ -152,30 +203,28 @@ export default function AdminGallery() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
                   <textarea
-                    required
                     rows={3}
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Enter photo description"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Image URL</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Image File</label>
                   <input
-                    type="url"
+                    type="file"
                     required
-                    value={formData.imageUrl}
-                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                    accept="image/*"
+                    onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="https://example.com/image.jpg"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
                   <select
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="projects">Projects</option>
@@ -183,14 +232,19 @@ export default function AdminGallery() {
                     <option value="office">Office</option>
                     <option value="events">Events</option>
                     <option value="products">Products</option>
+                    <option value="Panels">Panels</option>
+                    <option value="Automation">Automation</option>
+                    <option value="Training">Training</option>
+                    <option value="Installations">Installations</option>
                   </select>
                 </div>
                 <div className="flex space-x-4 pt-4">
                   <button
                     type="submit"
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-200"
+                    disabled={uploading}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-200 disabled:bg-blue-400"
                   >
-                    Upload Photo
+                    {uploading ? 'Uploading...' : 'Upload Photo'}
                   </button>
                   <button
                     type="button"

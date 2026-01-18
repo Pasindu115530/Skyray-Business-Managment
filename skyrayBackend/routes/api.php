@@ -13,3 +13,10 @@ Route::get('/gallery', [GalleryController::class, 'index']);
 Route::post('/gallery', [GalleryController::class, 'store']);
 Route::delete('/gallery/{id}', [GalleryController::class, 'destroy']);
 
+use App\Http\Controllers\ProjectController;
+
+Route::get('/projects', [ProjectController::class, 'index']);
+Route::post('/projects', [ProjectController::class, 'store']);
+Route::delete('/projects/{id}', [ProjectController::class, 'destroy']);
+
+

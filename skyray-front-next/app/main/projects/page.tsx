@@ -1,102 +1,68 @@
-"use client"; 
+"use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Zap, Settings, Factory, Filter } from 'lucide-react';
 
-const projectsData = [
-  {
-    id: 1,
-    title: 'Metropolitan Power Distribution',
-    category: 'Electrical Installations',
-    description: '25MW power distribution system for downtown commercial district',
-    image: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800',
-    year: '2024',
-    client: 'City Infrastructure Corp',
-  },
-  {
-    id: 2,
-    title: 'Smart Factory Automation',
-    category: 'Automation Solutions',
-    description: 'Complete automation system with AI-powered monitoring',
-    image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=800',
-    year: '2024',
-    client: 'TechManufacture Inc',
-  },
-  {
-    id: 3,
-    title: 'Industrial Complex Power System',
-    category: 'Industrial Power Systems',
-    description: 'High-voltage power infrastructure for manufacturing facility',
-    image: 'https://images.unsplash.com/photo-1581092160607-ee67e0e62837?w=800',
-    year: '2023',
-    client: 'Global Industries Ltd',
-  },
-  {
-    id: 4,
-    title: 'Hospital Backup Power',
-    category: 'Electrical Installations',
-    description: 'Emergency power system with redundancy for medical center',
-    image: 'https://images.unsplash.com/photo-1581092335397-9583eb92d232?w=800',
-    year: '2023',
-    client: 'Central Hospital',
-  },
-  {
-    id: 5,
-    title: 'Warehouse Automation',
-    category: 'Automation Solutions',
-    description: 'Automated material handling and power management system',
-    image: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800',
-    year: '2024',
-    client: 'LogisticsPro Corp',
-  },
-  {
-    id: 6,
-    title: 'Renewable Energy Integration',
-    category: 'Industrial Power Systems',
-    description: 'Solar and grid power integration for industrial park',
-    image: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=800',
-    year: '2023',
-    client: 'Green Energy Solutions',
-  },
-  {
-    id: 7,
-    title: 'Data Center Power Infrastructure',
-    category: 'Electrical Installations',
-    description: 'Redundant power system for mission-critical facility',
-    image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800',
-    year: '2024',
-    client: 'CloudTech Systems',
-  },
-  {
-    id: 8,
-    title: 'Manufacturing Plant Upgrade',
-    category: 'Industrial Power Systems',
-    description: 'Complete electrical system modernization',
-    image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800',
-    year: '2023',
-    client: 'Industrial Dynamics',
-  },
-  {
-    id: 9,
-    title: 'Smart Building Controls',
-    category: 'Automation Solutions',
-    description: 'Integrated building management and automation system',
-    image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800',
-    year: '2024',
-    client: 'Commercial Properties Inc',
-  },
-];
+interface Project {
+  id: number;
+  title: string;
+  category: string;
+  description: string;
+  image: string;
+  year: string;
+  client: string;
+}
 
 const categories = ['All Projects', 'Electrical Installations', 'Industrial Power Systems', 'Automation Solutions'];
 
 export default function Projects() {
   const [selectedCategory, setSelectedCategory] = useState('All Projects');
+  const [projectsData, setProjectsData] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/projects');
+        if (response.ok) {
+          const data = await response.json();
+          // Map backend data to frontend interface
+          const mappedData = data.map((item: any) => ({
+            id: item.id,
+            title: item.title,
+            category: item.category,
+            description: item.description || '',
+            image: item.image_url || 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800', // Fallback image
+            year: new Date(item.start_date).getFullYear().toString(),
+            client: item.client_name,
+          }));
+          setProjectsData(mappedData);
+        } else {
+          console.error('Failed to fetch projects');
+        }
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
 
   const filteredProjects =
     selectedCategory === 'All Projects'
       ? projectsData
       : projectsData.filter((project) => project.category === selectedCategory);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
+        <div className="text-xl text-gray-600">Loading projects...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="pt-20 min-h-screen bg-gray-50">
@@ -138,11 +104,10 @@ export default function Projects() {
               <motion.button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-6 py-2 rounded-full transition-all ${
-                  selectedCategory === category
+                className={`px-6 py-2 rounded-full transition-all ${selectedCategory === category
                     ? 'bg-gradient-to-r from-[#8B1538] to-[#D4AF37] text-white shadow-lg'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                  }`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -229,6 +194,20 @@ export default function Projects() {
               ))}
             </motion.div>
           </AnimatePresence>
+
+          {/* No Results */}
+          {!loading && filteredProjects.length === 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-16"
+            >
+              <div className="text-6xl mb-4">📂</div>
+              <h3 className="text-2xl text-gray-600 mb-2">No projects found</h3>
+              <p className="text-gray-500">Try selecting a different category</p>
+            </motion.div>
+          )}
+
         </div>
       </section>
 

@@ -19,4 +19,12 @@ Route::get('/projects', [ProjectController::class, 'index']);
 Route::post('/projects', [ProjectController::class, 'store']);
 Route::delete('/projects/{id}', [ProjectController::class, 'destroy']);
 
+use App\Http\Controllers\ProductController;
+
+Route::get('/products', [ProductController::class, 'index']);
+Route::post('/products', [ProductController::class, 'store']);
+Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+Route::post('/products/{id}', [ProductController::class, 'update']);
+
+
 

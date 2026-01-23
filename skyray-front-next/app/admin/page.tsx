@@ -38,26 +38,20 @@ interface DashboardStats {
 
 const COLORS = ['#10b981', '#f59e0b', '#ef4444', '#6b7280'];
 
-// Fake data for dashboard
-const fakeDashboardStats: DashboardStats = {
-  totalQuotations: 45,
-  pendingQuotations: 12,
-  approvedQuotations: 28,
-  rejectedQuotations: 5,
-  totalCustomers: 156,
-  totalRevenue: 2850000,
-  recentQuotations: [
-    { id: 1, customerName: 'John Doe', email: 'john@example.com', service: 'Web Development', status: 'approved', amount: 150000, createdAt: '2026-01-10' },
-    { id: 2, customerName: 'Jane Smith', email: 'jane@example.com', service: 'Mobile App', status: 'pending', amount: 250000, createdAt: '2026-01-09' },
-    { id: 3, customerName: 'Mike Johnson', email: 'mike@example.com', service: 'Digital Marketing', status: 'approved', amount: 75000, createdAt: '2026-01-08' },
-    { id: 4, customerName: 'Sarah Williams', email: 'sarah@example.com', service: 'Cloud Services', status: 'pending', amount: 120000, createdAt: '2026-01-07' },
-    { id: 5, customerName: 'David Brown', email: 'david@example.com', service: 'UI/UX Design', status: 'rejected', amount: 80000, createdAt: '2026-01-06' },
-  ]
-};
 
 
 export default function AdminDashboard() {
-  const [stats] = useState<DashboardStats>(fakeDashboardStats);
+  const [stats, setStats] = useState<DashboardStats>({
+    totalQuotations: 0,
+    pendingQuotations: 0,
+    approvedQuotations: 0,
+    rejectedQuotations: 0,
+    totalCustomers: 0,
+    totalRevenue: 0,
+    recentQuotations: []
+  });
+  const [monthlyData, setMonthlyData] = useState<any[]>([]);
+  const [isLoadingMainData, setIsLoadingMainData] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -69,8 +63,36 @@ export default function AdminDashboard() {
     const authStatus = localStorage.getItem('adminAuthenticated');
     if (authStatus === 'true') {
       setIsAuthenticated(true);
+      fetchDashboardData();
+    } else {
+      setIsLoadingMainData(false);
     }
   }, []);
+
+  // Fetch data when authentication state changes to true
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchDashboardData();
+    }
+  }, [isAuthenticated]);
+
+  const fetchDashboardData = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/admin/dashboard');
+      if (response.ok) {
+        const data = await response.json();
+        const { monthlyData, ...statsData } = data;
+        setStats(statsData);
+        setMonthlyData(monthlyData);
+      } else {
+        console.error('Failed to fetch dashboard data');
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setIsLoadingMainData(false);
+    }
+  };
 
   const quotationChartData = [
     { name: 'Approved', value: stats.approvedQuotations },
@@ -78,14 +100,6 @@ export default function AdminDashboard() {
     { name: 'Rejected', value: stats.rejectedQuotations },
   ];
 
-  const monthlyData = [
-    { month: 'Jan', quotations: 12 },
-    { month: 'Feb', quotations: 19 },
-    { month: 'Mar', quotations: 15 },
-    { month: 'Apr', quotations: 25 },
-    { month: 'May', quotations: 22 },
-    { month: 'Jun', quotations: 30 },
-  ];
 
   // ... (keeping chart data definitions if they were here, but the target content starts after them usually, let's verify context)
   // Actually, to avoid breaking chart data which is above handleLogin, I will target the state definitions and handleLogin.
@@ -214,7 +228,7 @@ export default function AdminDashboard() {
     }
   };
 
-  if (loading) {
+  if (loading || (isAuthenticated && isLoadingMainData)) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>

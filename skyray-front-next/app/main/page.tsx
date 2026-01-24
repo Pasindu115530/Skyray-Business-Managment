@@ -276,14 +276,7 @@ export default function Home() {
               View Our Projects
             </motion.button>
 
-            <motion.button
-              onClick={() => router.push('/login')}
-              className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-lg border border-[#D4AF37]/50 hover:bg-[#D4AF37]/20 transition-all"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Customer Login
-            </motion.button>
+            {/* Removed Customer Login Button */}
           </motion.div>
         </div>
 

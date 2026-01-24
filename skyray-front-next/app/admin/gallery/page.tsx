@@ -28,7 +28,7 @@ export default function AdminGallery() {
 
   const fetchImages = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/gallery');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/gallery`);
       if (response.ok) {
         const data = await response.json();
         setImages(data);
@@ -61,7 +61,7 @@ export default function AdminGallery() {
     formData.append('category', category);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/gallery', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/gallery`, {
         method: 'POST',
         body: formData,
       });
@@ -92,7 +92,7 @@ export default function AdminGallery() {
     if (!confirm('Are you sure you want to delete this image?')) return;
 
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/gallery/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/gallery/${id}`, {
         method: 'DELETE',
       });
 

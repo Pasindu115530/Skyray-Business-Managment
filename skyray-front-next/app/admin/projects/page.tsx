@@ -38,7 +38,7 @@ export default function AdminProjects() {
 
   const fetchProjects = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/projects');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/projects`);
       if (response.ok) {
         const data = await response.json();
         setProjects(data);
@@ -74,7 +74,7 @@ export default function AdminProjects() {
     }
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/projects', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/projects`, {
         method: 'POST',
         body: data,
       });
@@ -110,7 +110,7 @@ export default function AdminProjects() {
     if (!confirm('Are you sure you want to delete this project?')) return;
 
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/projects/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/projects/${id}`, {
         method: 'DELETE',
       });
 

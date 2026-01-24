@@ -78,7 +78,7 @@ export default function AdminDashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/admin/dashboard');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/dashboard`);
       if (response.ok) {
         const data = await response.json();
         const { monthlyData, ...statsData } = data;
@@ -110,7 +110,7 @@ export default function AdminDashboard() {
     setError('');
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/admin/login', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -24,7 +24,7 @@ export default function Projects() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:8000/api/projects');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/projects`);
         if (response.ok) {
           const data = await response.json();
           // Map backend data to frontend interface
@@ -105,8 +105,8 @@ export default function Projects() {
                 key={category}
                 onClick={() => setSelectedCategory(category)}
                 className={`px-6 py-2 rounded-full transition-all ${selectedCategory === category
-                    ? 'bg-gradient-to-r from-[#8B1538] to-[#D4AF37] text-white shadow-lg'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-gradient-to-r from-[#8B1538] to-[#D4AF37] text-white shadow-lg'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}

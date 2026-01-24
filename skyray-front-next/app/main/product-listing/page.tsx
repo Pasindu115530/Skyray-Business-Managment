@@ -34,8 +34,8 @@ function ProductContent() {
       try {
         // Fetch products, optionally filtering by category if provided
         const url = categoryId
-          ? `http://127.0.0.1:8000/api/products?category=${encodeURIComponent(categoryId)}`
-          : `http://127.0.0.1:8000/api/products`;
+          ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/products?category=${encodeURIComponent(categoryId)}`
+          : `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/products`;
 
         const response = await fetch(url);
         if (response.ok) {
@@ -163,8 +163,8 @@ function ProductContent() {
                       onClick={() => handleAddToCart(product)}
                       disabled={addedProducts.has(product.id)}
                       className={`w-full py-3 rounded-lg transition-all flex items-center justify-center space-x-2 ${addedProducts.has(product.id)
-                          ? 'bg-green-500 text-white'
-                          : 'bg-gradient-to-r from-blue-600 to-orange-500 text-white hover:shadow-lg'
+                        ? 'bg-green-500 text-white'
+                        : 'bg-gradient-to-r from-blue-600 to-orange-500 text-white hover:shadow-lg'
                         }`}
                     >
                       {addedProducts.has(product.id) ? (

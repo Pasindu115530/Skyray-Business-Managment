@@ -38,7 +38,7 @@ export default function AdminProducts() {
 
     const fetchProducts = async () => {
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/products');
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/products`);
             if (response.ok) {
                 const data = await response.json();
                 setProducts(data);
@@ -71,7 +71,7 @@ export default function AdminProducts() {
         }
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/products', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/products`, {
                 method: 'POST',
                 body: data,
             });
@@ -104,7 +104,7 @@ export default function AdminProducts() {
         if (!confirm('Are you sure you want to delete this product?')) return;
 
         try {
-            const response = await fetch(`http://127.0.0.1:8000/api/products/${id}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/products/${id}`, {
                 method: 'DELETE',
             });
 
@@ -149,8 +149,8 @@ export default function AdminProducts() {
                         <button
                             onClick={() => setSelectedCategory('All')}
                             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedCategory === 'All'
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-white text-gray-600 hover:bg-gray-50'
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-white text-gray-600 hover:bg-gray-50'
                                 }`}
                         >
                             All
@@ -160,8 +160,8 @@ export default function AdminProducts() {
                                 key={category}
                                 onClick={() => setSelectedCategory(category)}
                                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedCategory === category
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-white text-gray-600 hover:bg-gray-50'
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-white text-gray-600 hover:bg-gray-50'
                                     }`}
                             >
                                 {category}

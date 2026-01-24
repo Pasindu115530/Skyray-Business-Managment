@@ -9,9 +9,15 @@ use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::orderBy('created_at', 'desc')->get();
+        $query = Product::orderBy('created_at', 'desc');
+
+        if ($request->has('category') && $request->category != 'All') {
+             $query->where('category', $request->category);
+        }
+
+        $products = $query->get();
         return response()->json($products, 200);
     }
 

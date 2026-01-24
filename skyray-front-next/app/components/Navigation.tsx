@@ -24,6 +24,7 @@ export default function Navigation({ user, onLogout, cartCount }: NavigationProp
     { label: 'Home', href: '/main' },
     { label: 'About Us', href: '/main/about' },
     { label: 'Our Services', href: '/main/services' },
+    { label: 'Products', href: '/main/cart-categories' },
     { label: 'Projects', href: '/main/projects' },
     { label: 'Gallery', href: '/main/gallery' },
     { label: 'Contact', href: '/main/contact' },

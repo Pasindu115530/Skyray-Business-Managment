@@ -447,9 +447,6 @@ export default function AdminDashboard() {
             <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200">
               View All Quotations
             </button>
-            <button className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200">
-              Manage Customers
-            </button>
             <button className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200">
               Generate Report
             </button>

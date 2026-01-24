@@ -14,6 +14,7 @@ import {
   Settings,
   LogOut,
   Zap,
+  Package,
 } from 'lucide-react';
 import Image from 'next/image';
 import logo from '@/public/skyraylogo.jpg';
@@ -39,7 +40,7 @@ export default function AdminNavigation({ onLogout }: AdminNavigationProps) {
   const navItems = [
     { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { label: 'Projects', href: '/admin/projects', icon: FolderOpen },
-    { label: 'Customers', href: '/admin/customers', icon: Users },
+    { label: 'Products', href: '/admin/products', icon: Package },
     { label: 'Gallery', href: '/admin/gallery', icon: ImageIcon },
     { label: 'Quotation', href: '/admin/quotation', icon: Zap },
     { label: 'Settings', href: '/admin/settings', icon: Settings },
@@ -49,15 +50,14 @@ export default function AdminNavigation({ onLogout }: AdminNavigationProps) {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 ${
-        scrolled
-          ? 'bg-white/98 backdrop-blur-md shadow-lg'
-          : 'bg-white/95 backdrop-blur-sm shadow-sm'
-      } border-b border-gray-100`}
+      className={`fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 ${scrolled
+        ? 'bg-white/98 backdrop-blur-md shadow-lg'
+        : 'bg-white/95 backdrop-blur-sm shadow-sm'
+        } border-b border-gray-100`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 md:h-20">
-          
+
           {/* Logo */}
           <motion.div
             whileHover={{ scale: 1.05 }}
@@ -85,11 +85,10 @@ export default function AdminNavigation({ onLogout }: AdminNavigationProps) {
                 <motion.div key={item.href} whileHover={{ y: -2 }} whileTap={{ y: 0 }}>
                   <Link href={item.href} className="relative group w-full">
                     <motion.div
-                      className={`relative px-4 py-3 text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 rounded-lg whitespace-nowrap ${
-                        active
-                          ? 'text-[#8B1538] bg-gradient-to-r from-[#8B1538]/10 to-[#D4AF37]/10'
-                          : 'text-gray-600 group-hover:text-[#8B1538] group-hover:bg-gray-50'
-                      }`}
+                      className={`relative px-4 py-3 text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 rounded-lg whitespace-nowrap ${active
+                        ? 'text-[#8B1538] bg-gradient-to-r from-[#8B1538]/10 to-[#D4AF37]/10'
+                        : 'text-gray-600 group-hover:text-[#8B1538] group-hover:bg-gray-50'
+                        }`}
                       whileHover={!active ? { x: 4 } : {}}
                     >
                       {/* Active Left Border Indicator */}
@@ -200,11 +199,10 @@ export default function AdminNavigation({ onLogout }: AdminNavigationProps) {
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <motion.div
-                        className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all duration-300 relative ${
-                          active
-                            ? 'text-[#8B1538] bg-gradient-to-r from-[#8B1538]/10 to-[#D4AF37]/10'
-                            : 'text-gray-700 hover:bg-gray-50'
-                        }`}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all duration-300 relative ${active
+                          ? 'text-[#8B1538] bg-gradient-to-r from-[#8B1538]/10 to-[#D4AF37]/10'
+                          : 'text-gray-700 hover:bg-gray-50'
+                          }`}
                         whileHover={!active ? { x: 4 } : {}}
                       >
                         {/* Active Icon Glow */}

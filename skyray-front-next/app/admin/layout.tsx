@@ -12,7 +12,8 @@ import {
     Menu,
     X,
     Package,
-    FileText
+    FileText,
+    Image
 } from 'lucide-react';
 import { cn } from '@/lib/utils'; // Assuming you have utils
 import { Button } from '@/components/ui/button';
@@ -43,6 +44,7 @@ export default function AdminLayout({
         { name: 'Quotation Requests', icon: FileText, href: '/admin/quotations' },
         { name: 'Projects Management', icon: FolderPlus, href: '/admin/projects' },
         { name: 'Products Management', icon: Package, href: '/admin/products' },
+        { name: 'Gallery', icon: Image, href: '/admin/gallery' },
         { name: 'Customers Management', icon: Users, href: '/admin/customers' },
         { name: 'Settings', icon: Settings, href: '/admin/settings' },
     ];

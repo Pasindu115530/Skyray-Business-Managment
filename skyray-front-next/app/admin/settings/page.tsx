@@ -1,231 +1,407 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
-import AdminNavigation from '@/app/components/AdminNavigation';
+import React, { useState } from 'react';
+import { Save, User, Bell, Shield, Mail, Globe, Database, Palette } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
-export default function AdminSettings() {
-  const [profileData, setProfileData] = useState({
-    name: 'Admin User',
-    email: 'admin@skyray.com',
-    phone: '+91 9876543210'
-  });
+export default function SettingsPage() {
+    const [loading, setLoading] = useState(false);
+    const [success, setSuccess] = useState('');
+    const [formData, setFormData] = useState({
+        // Profile Settings
+        companyName: 'Titec Automation',
+        email: 'admin@titec.com',
+        phone: '+94 77 123 4567',
+        address: 'Colombo, Sri Lanka',
+        
+        // Email Settings
+        smtpHost: 'smtp.gmail.com',
+        smtpPort: '587',
+        smtpUser: '',
+        smtpPassword: '',
+        
+        // Notification Settings
+        emailNotifications: true,
+        orderNotifications: true,
+        promotionalEmails: false,
+        
+        // General Settings
+        siteName: 'Titec Automation',
+        siteUrl: 'https://titec.com',
+        currency: 'USD',
+        timezone: 'Asia/Colombo',
+        language: 'en',
+    });
 
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value, type } = e.target;
+        const checked = (e.target as HTMLInputElement).checked;
+        
+        setFormData(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }));
+    };
 
-  const [notifications, setNotifications] = useState({
-    emailQuotations: true,
-    emailCustomers: true,
-    weeklySummary: false,
-    projectUpdates: true
-  });
+    const handleSave = async () => {
+        setLoading(true);
+        setSuccess('');
 
-  const handleProfileSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert('Profile updated successfully!');
-  };
+        try {
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            setSuccess('Settings saved successfully!');
+            
+            setTimeout(() => setSuccess(''), 3000);
+        } catch (error) {
+            console.error('Error saving settings:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert('Passwords do not match!');
-      return;
-    }
-    alert('Password updated successfully!');
-    setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-  };
-
-  const handleNotificationsSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert('Notification preferences saved!');
-  };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <AdminNavigation onLogout={() => console.log('Logout')} />
-
-      {/* Main Content */}
-      <div className="pt-20 md:pt-24 p-4 md:p-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-            <p className="text-gray-600 mt-2">Manage your admin preferences and configurations</p>
-          </div>
-
-          <div className="space-y-6">
-            {/* Profile Settings */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Profile Settings</h2>
-              <form onSubmit={handleProfileSubmit} className="space-y-4">
+    return (
+        <div className="max-w-5xl mx-auto space-y-6">
+            <div className="flex items-center justify-between">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Admin Name</label>
-                  <input
-                    type="text"
-                    value={profileData.name}
-                    onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Admin Name"
-                  />
+                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">
+                        Settings
+                    </h1>
+                    <p className="text-gray-500 mt-1">Manage your application preferences and configuration.</p>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                  <input
-                    type="email"
-                    value={profileData.email}
-                    onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="admin@skyray.com"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
-                  <input
-                    type="tel"
-                    value={profileData.phone}
-                    onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="+91 9876543210"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg"
-                >
-                  Save Profile Changes
-                </button>
-              </form>
+                <Button className="gap-2" onClick={handleSave} disabled={loading}>
+                    <Save className="h-4 w-4" />
+                    {loading ? 'Saving...' : 'Save Changes'}
+                </Button>
             </div>
 
-            {/* Password Settings */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Change Password</h2>
-              <form onSubmit={handlePasswordSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
-                  <input
-                    type="password"
-                    value={passwordData.currentPassword}
-                    onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter current password"
-                  />
+            {success && (
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <p className="text-green-600 text-sm">{success}</p>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
-                  <input
-                    type="password"
-                    value={passwordData.newPassword}
-                    onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter new password"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
-                  <input
-                    type="password"
-                    value={passwordData.confirmPassword}
-                    onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Confirm new password"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg"
-                >
-                  Update Password
-                </button>
-              </form>
-            </div>
+            )}
 
-            {/* Notification Settings */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Notifications</h2>
-              <form onSubmit={handleNotificationsSubmit} className="space-y-3">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={notifications.emailQuotations}
-                    onChange={(e) => setNotifications({ ...notifications, emailQuotations: e.target.checked })}
-                    className="rounded text-blue-600 w-4 h-4"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">Email notifications for new quotations</span>
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={notifications.emailCustomers}
-                    onChange={(e) => setNotifications({ ...notifications, emailCustomers: e.target.checked })}
-                    className="rounded text-blue-600 w-4 h-4"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">Email notifications for new customers</span>
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={notifications.weeklySummary}
-                    onChange={(e) => setNotifications({ ...notifications, weeklySummary: e.target.checked })}
-                    className="rounded text-blue-600 w-4 h-4"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">Weekly summary reports</span>
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={notifications.projectUpdates}
-                    onChange={(e) => setNotifications({ ...notifications, projectUpdates: e.target.checked })}
-                    className="rounded text-blue-600 w-4 h-4"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">Project status updates</span>
-                </label>
-                <button
-                  type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg mt-4"
-                >
-                  Save Notification Preferences
-                </button>
-              </form>
-            </div>
+            <div className="grid grid-cols-1 gap-6">
+                {/* Profile Settings */}
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center gap-2">
+                            <User className="h-5 w-5 text-gray-600" />
+                            <CardTitle>Profile Settings</CardTitle>
+                        </div>
+                        <CardDescription>Update your company profile information.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Company Name</label>
+                                <Input
+                                    name="companyName"
+                                    value={formData.companyName}
+                                    onChange={handleInputChange}
+                                    placeholder="Enter company name"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Email Address</label>
+                                <Input
+                                    type="email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleInputChange}
+                                    placeholder="admin@example.com"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Phone Number</label>
+                                <Input
+                                    type="tel"
+                                    name="phone"
+                                    value={formData.phone}
+                                    onChange={handleInputChange}
+                                    placeholder="+94 77 123 4567"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Address</label>
+                                <Input
+                                    name="address"
+                                    value={formData.address}
+                                    onChange={handleInputChange}
+                                    placeholder="Enter address"
+                                />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
 
-            {/* System Settings */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">System Settings</h2>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center py-3 border-b border-gray-200">
-                  <div>
-                    <p className="font-medium text-gray-900">Database Status</p>
-                    <p className="text-sm text-gray-600">Check database connection</p>
-                  </div>
-                  <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
-                    Connected
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-3 border-b border-gray-200">
-                  <div>
-                    <p className="font-medium text-gray-900">API Version</p>
-                    <p className="text-sm text-gray-600">Current API version</p>
-                  </div>
-                  <span className="text-gray-900 font-semibold">v1.0.0</span>
-                </div>
-                <div className="flex justify-between items-center py-3">
-                  <div>
-                    <p className="font-medium text-gray-900">Clear Cache</p>
-                    <p className="text-sm text-gray-600">Clear application cache</p>
-                  </div>
-                  <button className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg transition duration-200">
-                    Clear
-                  </button>
-                </div>
-              </div>
+                {/* General Settings */}
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center gap-2">
+                            <Globe className="h-5 w-5 text-gray-600" />
+                            <CardTitle>General Settings</CardTitle>
+                        </div>
+                        <CardDescription>Configure basic site settings and preferences.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Site Name</label>
+                                <Input
+                                    name="siteName"
+                                    value={formData.siteName}
+                                    onChange={handleInputChange}
+                                    placeholder="Your site name"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Site URL</label>
+                                <Input
+                                    type="url"
+                                    name="siteUrl"
+                                    value={formData.siteUrl}
+                                    onChange={handleInputChange}
+                                    placeholder="https://example.com"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Currency</label>
+                                <select
+                                    name="currency"
+                                    value={formData.currency}
+                                    onChange={handleInputChange}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option value="USD">USD - US Dollar</option>
+                                    <option value="EUR">EUR - Euro</option>
+                                    <option value="GBP">GBP - British Pound</option>
+                                    <option value="LKR">LKR - Sri Lankan Rupee</option>
+                                </select>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Timezone</label>
+                                <select
+                                    name="timezone"
+                                    value={formData.timezone}
+                                    onChange={handleInputChange}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option value="Asia/Colombo">Asia/Colombo</option>
+                                    <option value="America/New_York">America/New_York</option>
+                                    <option value="Europe/London">Europe/London</option>
+                                    <option value="Asia/Tokyo">Asia/Tokyo</option>
+                                </select>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Email Configuration */}
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center gap-2">
+                            <Mail className="h-5 w-5 text-gray-600" />
+                            <CardTitle>Email Configuration</CardTitle>
+                        </div>
+                        <CardDescription>Configure SMTP settings for email notifications.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">SMTP Host</label>
+                                <Input
+                                    name="smtpHost"
+                                    value={formData.smtpHost}
+                                    onChange={handleInputChange}
+                                    placeholder="smtp.gmail.com"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">SMTP Port</label>
+                                <Input
+                                    name="smtpPort"
+                                    value={formData.smtpPort}
+                                    onChange={handleInputChange}
+                                    placeholder="587"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">SMTP Username</label>
+                                <Input
+                                    name="smtpUser"
+                                    value={formData.smtpUser}
+                                    onChange={handleInputChange}
+                                    placeholder="your-email@gmail.com"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">SMTP Password</label>
+                                <Input
+                                    type="password"
+                                    name="smtpPassword"
+                                    value={formData.smtpPassword}
+                                    onChange={handleInputChange}
+                                    placeholder="Enter password"
+                                />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Notification Settings */}
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center gap-2">
+                            <Bell className="h-5 w-5 text-gray-600" />
+                            <CardTitle>Notification Preferences</CardTitle>
+                        </div>
+                        <CardDescription>Manage how you receive notifications and alerts.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-3">
+                            <label className="flex items-center gap-3 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    name="emailNotifications"
+                                    checked={formData.emailNotifications}
+                                    onChange={handleInputChange}
+                                    className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                                />
+                                <div>
+                                    <div className="text-sm font-medium">Email Notifications</div>
+                                    <div className="text-xs text-gray-500">Receive email alerts for important events</div>
+                                </div>
+                            </label>
+                            
+                            <label className="flex items-center gap-3 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    name="orderNotifications"
+                                    checked={formData.orderNotifications}
+                                    onChange={handleInputChange}
+                                    className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                                />
+                                <div>
+                                    <div className="text-sm font-medium">Order Notifications</div>
+                                    <div className="text-xs text-gray-500">Get notified about new orders and updates</div>
+                                </div>
+                            </label>
+                            
+                            <label className="flex items-center gap-3 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    name="promotionalEmails"
+                                    checked={formData.promotionalEmails}
+                                    onChange={handleInputChange}
+                                    className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                                />
+                                <div>
+                                    <div className="text-sm font-medium">Promotional Emails</div>
+                                    <div className="text-xs text-gray-500">Receive promotional content and newsletters</div>
+                                </div>
+                            </label>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Security Settings */}
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center gap-2">
+                            <Shield className="h-5 w-5 text-gray-600" />
+                            <CardTitle>Security Settings</CardTitle>
+                        </div>
+                        <CardDescription>Manage security and authentication preferences.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Current Password</label>
+                                <Input
+                                    type="password"
+                                    placeholder="Enter current password"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">New Password</label>
+                                <Input
+                                    type="password"
+                                    placeholder="Enter new password"
+                                />
+                            </div>
+                        </div>
+                        <Button variant="outline" className="w-full md:w-auto">
+                            Change Password
+                        </Button>
+                    </CardContent>
+                </Card>
+
+                {/* Database Settings */}
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center gap-2">
+                            <Database className="h-5 w-5 text-gray-600" />
+                            <CardTitle>Database & Backup</CardTitle>
+                        </div>
+                        <CardDescription>Manage database connections and backup settings.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div>
+                                <div className="text-sm font-medium">Database Status</div>
+                                <div className="text-xs text-gray-500 mt-1">Connected to MongoDB</div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <span className="text-sm text-green-600">Active</span>
+                            </div>
+                        </div>
+                        <div className="flex gap-3">
+                            <Button variant="outline">Backup Database</Button>
+                            <Button variant="outline">Test Connection</Button>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Appearance Settings */}
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center gap-2">
+                            <Palette className="h-5 w-5 text-gray-600" />
+                            <CardTitle>Appearance</CardTitle>
+                        </div>
+                        <CardDescription>Customize the look and feel of your dashboard.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Theme</label>
+                            <select
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="light">Light</option>
+                                <option value="dark">Dark</option>
+                                <option value="auto">Auto</option>
+                            </select>
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Language</label>
+                            <select
+                                name="language"
+                                value={formData.language}
+                                onChange={handleInputChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="en">English</option>
+                                <option value="si">Sinhala</option>
+                                <option value="ta">Tamil</option>
+                            </select>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
-          </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 }

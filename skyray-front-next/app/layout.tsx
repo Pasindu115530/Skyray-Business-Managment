@@ -5,6 +5,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "@/app/globals.css";
 
 import JsonLd from "@/components/JsonLd";
+import { Toaster } from 'sonner';
+import { AuthProvider } from "@/context/AuthContext";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -89,8 +91,11 @@ export default function RootLayout({
         </Head>
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
-        <JsonLd data={jsonLdData} />
-        {children}
+        <AuthProvider>
+          <JsonLd data={jsonLdData} />
+          {children}
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );

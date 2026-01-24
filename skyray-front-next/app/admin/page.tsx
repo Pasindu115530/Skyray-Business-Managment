@@ -1,458 +1,211 @@
 'use client';
-
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import React, { useState, useEffect } from 'react';
+import { quotationService } from '@/services/quotationService';
 import { motion } from 'framer-motion';
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell
-} from 'recharts';
-import AdminNavigation from '@/app/components/AdminNavigation';
-
-interface DashboardStats {
-  totalQuotations: number;
-  pendingQuotations: number;
-  approvedQuotations: number;
-  rejectedQuotations: number;
-  totalCustomers: number;
-  totalRevenue: number;
-  recentQuotations: Array<{
-    id: number;
-    customerName: string;
-    email: string;
-    service: string;
-    status: string;
-    amount: number;
-    createdAt: string;
-  }>;
-}
-
-const COLORS = ['#10b981', '#f59e0b', '#ef4444', '#6b7280'];
-
-
+    Users,
+    DollarSign,
+    ShoppingBag,
+    Activity,
+    ArrowUpRight,
+    ArrowDownRight,
+    Search,
+    Filter,
+    MoreHorizontal,
+    FileText
+} from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/AuthContext';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalQuotations: 0,
-    pendingQuotations: 0,
-    approvedQuotations: 0,
-    rejectedQuotations: 0,
-    totalCustomers: 0,
-    totalRevenue: 0,
-    recentQuotations: []
-  });
-  const [monthlyData, setMonthlyData] = useState<any[]>([]);
-  const [isLoadingMainData, setIsLoadingMainData] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [statsData, setStatsData] = useState({
+        total: 0,
+        pending: 0,
+        reviewed: 0,
+        quoted: 0
+    });
+    const [recentRequests, setRecentRequests] = useState<any[]>([]);
+    const { user, isAdmin, isLoading } = useAuth();
+    const router = useRouter();
 
-  // Check if user is already authenticated on component mount
-  useEffect(() => {
-    const authStatus = localStorage.getItem('adminAuthenticated');
-    if (authStatus === 'true') {
-      setIsAuthenticated(true);
-      fetchDashboardData();
-    } else {
-      setIsLoadingMainData(false);
+    useEffect(() => {
+        if (isLoading) return;
+
+        // Redirect to admin login if not authenticated as admin
+        if (!isAdmin) {
+            router.push('/admin/login');
+            return;
+        }
+        fetchDashboardData();
+    }, [isAdmin, isLoading, router]);
+
+    if (isLoading) {
+        return (
+            <div className="flex h-screen items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            </div>
+        );
     }
-  }, []);
 
-  // Fetch data when authentication state changes to true
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchDashboardData();
-    }
-  }, [isAuthenticated]);
+    const fetchDashboardData = async () => {
+        try {
+            // Import dynamically to avoid circular deps if any, or just standard import
+            const { dashboardService } = await import('@/services/dashboardService');
+            const data = await dashboardService.getStats();
+            setStatsData(data.stats);
+            setRecentRequests(data.recent_requests);
+        } catch (error) {
+            console.error('Failed to fetch dashboard stats:', error);
+        }
+    };
 
-  const fetchDashboardData = async () => {
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/dashboard`);
-      if (response.ok) {
-        const data = await response.json();
-        const { monthlyData, ...statsData } = data;
-        setStats(statsData);
-        setMonthlyData(monthlyData);
-      } else {
-        console.error('Failed to fetch dashboard data');
-      }
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    } finally {
-      setIsLoadingMainData(false);
-    }
-  };
+    const stats = [
+        { label: 'Quotation Requests', value: statsData.total.toString(), change: '+12%', icon: FileText, trend: 'up' },
+        { label: 'Pending Requests', value: statsData.pending.toString(), change: '+5%', icon: Activity, trend: 'up' },
+        { label: 'Quoted', value: statsData.quoted.toString(), change: '+8%', icon: ShoppingBag, trend: 'up' },
+        { label: 'Under Review', value: statsData.reviewed.toString(), change: '-2%', icon: Users, trend: 'down' },
+    ];
 
-  const quotationChartData = [
-    { name: 'Approved', value: stats.approvedQuotations },
-    { name: 'Pending', value: stats.pendingQuotations },
-    { name: 'Rejected', value: stats.rejectedQuotations },
-  ];
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'Quoted': return 'bg-emerald-50 text-emerald-700 border-emerald-200 ring-emerald-200/50';
+            case 'Reviewed': return 'bg-sky-50 text-sky-700 border-sky-200 ring-sky-200/50';
+            case 'Pending': return 'bg-amber-50 text-amber-700 border-amber-200 ring-amber-200/50';
+            case 'Rejected': return 'bg-rose-50 text-rose-700 border-rose-200 ring-rose-200/50';
+            default: return 'bg-slate-100 text-slate-700 border-slate-200';
+        }
+    };
 
-
-  // ... (keeping chart data definitions if they were here, but the target content starts after them usually, let's verify context)
-  // Actually, to avoid breaking chart data which is above handleLogin, I will target the state definitions and handleLogin.
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setIsAuthenticated(true);
-        localStorage.setItem('adminAuthenticated', 'true');
-        // Store admin details if needed
-        localStorage.setItem('adminDetails', JSON.stringify(data.admin));
-        setError('');
-        setEmail('');
-        setPassword('');
-      } else {
-        setError(data.message || (data.errors && data.errors.email ? data.errors.email[0] : 'Login failed'));
-      }
-    } catch (err) {
-      console.error('Login error:', err);
-      setError('Unable to connect to the server. Please check your connection.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    localStorage.removeItem('adminAuthenticated');
-    localStorage.removeItem('adminDetails');
-    setEmail('');
-    setPassword('');
-    setError('');
-  };
-
-  // Login Page
-  if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-md"
-        >
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">Admin Login</h1>
-              <p className="text-gray-600 mt-2">Enter your credentials to access the dashboard</p>
-            </div>
-
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter admin email"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  autoFocus
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter admin password"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-
-              {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded text-sm">
-                  {error}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
-              >
-                {loading ? 'Logging in...' : 'Login'}
-              </button>
-            </form>
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
-
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'approved':
-        return 'bg-green-100 text-green-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'rejected':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  if (loading || (isAuthenticated && isLoadingMainData)) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <AdminNavigation onLogout={handleLogout} />
-
-      {/* Main Content */}
-      <div className="pt-20 md:pt-24 p-4 md:p-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-            <p className="text-gray-600 mt-2">Overview of quotations and customer statistics</p>
-          </div>
-
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {/* Total Quotations */}
-            <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
-              <div className="flex items-center justify-between">
+        <div className="space-y-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-6">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Quotations</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-2">{stats.totalQuotations}</p>
+                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 tracking-tight">
+                        Dashboard Overview
+                    </h1>
+                    <p className="text-slate-500 mt-2 text-sm max-w-lg">
+                        Welcome back! Here's a summary of your recent quotation activity and performance metrics.
+                    </p>
                 </div>
-                <div className="bg-blue-100 rounded-full p-3">
-                  <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
+                <div className="flex gap-3">
+                    <Link href="/admin/quotations">
+                        <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-200 transition-all">
+                            View All Quotations
+                        </Button>
+                    </Link>
                 </div>
-              </div>
             </div>
 
-            {/* Pending Quotations */}
-            <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-500">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Pending Quotations</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-2">{stats.pendingQuotations}</p>
-                </div>
-                <div className="bg-yellow-100 rounded-full p-3">
-                  <svg className="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {stats.map((stat, index) => (
+                    <motion.div
+                        key={stat.label}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                    >
+                        <Card className="hover:shadow-lg transition-all duration-300 border-slate-100 overflow-hidden group">
+                            <CardContent className="p-6 relative">
+                                <div className="absolute top-0 right-0 p-3 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-110">
+                                    <stat.icon className="w-24 h-24" />
+                                </div>
+                                <div className="flex items-center justify-between relative z-10">
+                                    <div className={`p-2.5 rounded-xl ${stat.trend === 'up' ? 'bg-indigo-50 text-indigo-600' : 'bg-rose-50 text-rose-600'} transition-colors`}>
+                                        <stat.icon className="w-5 h-5" />
+                                    </div>
+                                    <span className={`text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1 ${stat.trend === 'up' ? 'bg-green-50 text-green-700' : 'bg-rose-50 text-rose-700'}`}>
+                                        {stat.change}
+                                        {stat.trend === 'up' ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                                    </span>
+                                </div>
+                                <div className="mt-5 relative z-10">
+                                    <h3 className="text-3xl font-bold text-slate-900 tracking-tight">{stat.value}</h3>
+                                    <p className="text-sm text-slate-500 font-medium mt-1">{stat.label}</p>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                ))}
             </div>
 
-            {/* Approved Quotations */}
-            <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Approved Quotations</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-2">{stats.approvedQuotations}</p>
-                </div>
-                <div className="bg-green-100 rounded-full p-3">
-                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            {/* Rejected Quotations */}
-            <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-500">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Rejected Quotations</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-2">{stats.rejectedQuotations}</p>
-                </div>
-                <div className="bg-red-100 rounded-full p-3">
-                  <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Additional Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            {/* Total Customers */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">Customer Statistics</h2>
-                <div className="bg-purple-100 rounded-full p-2">
-                  <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                </div>
-              </div>
-              <p className="text-4xl font-bold text-gray-900">{stats.totalCustomers}</p>
-              <p className="text-gray-600 mt-2">Total registered customers</p>
-            </div>
-
-            {/* Total Revenue */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">Estimated Revenue</h2>
-                <div className="bg-green-100 rounded-full p-2">
-                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-              </div>
-              <p className="text-4xl font-bold text-gray-900">₹{stats.totalRevenue.toLocaleString()}</p>
-              <p className="text-gray-600 mt-2">From approved quotations</p>
-            </div>
-          </div>
-
-          {/* Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            {/* Pie Chart */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Quotation Status Distribution</h2>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={quotationChartData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, value, percent }) => `${name}: ${value} (${((percent ?? 0) * 100).toFixed(0)}%)`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {quotationChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* Bar Chart */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Monthly Quotations Trend</h2>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="quotations" fill="#3b82f6" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Recent Quotations Table */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Quotations</h2>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {stats.recentQuotations.length > 0 ? (
-                    stats.recentQuotations.map((quotation) => (
-                      <tr key={quotation.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          #{quotation.id}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {quotation.customerName}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {quotation.email}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {quotation.service}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          ₹{quotation.amount.toLocaleString()}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(quotation.status)}`}>
-                            {quotation.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {new Date(quotation.createdAt).toLocaleDateString()}
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-500">
-                        No quotations found
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200">
-              View All Quotations
-            </button>
-            <button className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200">
-              Generate Report
-            </button>
-          </div>
+            <Card className="border-slate-100 shadow-sm overflow-hidden">
+                <CardHeader className="flex flex-row items-center justify-between border-b border-slate-50 bg-slate-50/50 p-6">
+                    <div>
+                        <CardTitle className="text-lg font-semibold text-slate-800">Recent Activity</CardTitle>
+                        <CardDescription className="text-slate-500 mt-1">Latest quotation requests from potential clients</CardDescription>
+                    </div>
+                    <Link href="/admin/quotations">
+                        <Button variant="outline" size="sm" className="hidden sm:flex">
+                            View All
+                        </Button>
+                    </Link>
+                </CardHeader>
+                <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead className="bg-slate-50 border-b border-slate-100 text-left">
+                                <tr>
+                                    <th className="py-4 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider">Reference ID</th>
+                                    <th className="py-4 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider">Customer Details</th>
+                                    <th className="py-4 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider">Date Received</th>
+                                    <th className="py-4 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider">Current Status</th>
+                                    <th className="py-4 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Est. Amount</th>
+                                    <th className="py-4 px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {recentRequests.map((req) => (
+                                    <tr key={req.id} className="hover:bg-slate-50/80 transition-colors group">
+                                        <td className="py-4 px-6 text-sm font-medium text-indigo-600 font-mono">#{req.id}</td>
+                                        <td className="py-4 px-6">
+                                            <div className="flex items-center gap-3">
+                                                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xs text-white font-bold shadow-sm ring-2 ring-white">
+                                                    {req.customer ? req.customer.charAt(0).toUpperCase() : 'G'}
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm font-medium text-slate-900">{req.customer || 'Guest User'}</span>
+                                                    <span className="text-xs text-slate-500">{req.email}</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="py-4 px-6 text-sm text-slate-500 whitespace-nowrap">{req.date}</td>
+                                        <td className="py-4 px-6">
+                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ring-1 ring-inset ${getStatusColor(req.status)}`}>
+                                                <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${req.status === 'Quoted' ? 'bg-emerald-500' :
+                                                    req.status === 'Pending' ? 'bg-amber-500' :
+                                                        req.status === 'Reviewed' ? 'bg-sky-500' : 'bg-rose-500'
+                                                    }`}></span>
+                                                {req.status}
+                                            </span>
+                                        </td>
+                                        <td className="py-4 px-6 text-sm text-slate-700 text-right font-medium font-mono">
+                                            {req.amount !== '-' ? `$${req.amount}` : <span className="text-slate-400">—</span>}
+                                        </td>
+                                        <td className="py-4 px-6 text-right">
+                                            <Link href={`/admin/quotations`}>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors opacity-0 group-hover:opacity-100">
+                                                    <MoreHorizontal className="h-4 w-4" />
+                                                </Button>
+                                            </Link>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {recentRequests.length === 0 && (
+                                    <tr>
+                                        <td colSpan={6} className="py-12 text-center text-slate-400 italic">
+                                            No quotation requests found in the recent period.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </CardContent>
+            </Card>
         </div>
-      </div>
-    </div>
-  );
+    );
 }

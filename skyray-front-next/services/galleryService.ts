@@ -11,7 +11,7 @@ export interface GalleryItem {
 export const galleryService = {
     async getGalleryImages(): Promise<GalleryItem[]> {
         const response = await api.get('/api/gallery');
-        return response.data.data;
+        return response.data;
     },
 
     async uploadGalleryImage(formData: FormData): Promise<GalleryItem> {

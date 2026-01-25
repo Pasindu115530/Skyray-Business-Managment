@@ -62,6 +62,7 @@ export default function GalleryPage() {
             const submitData = new FormData();
             submitData.append('title', formData.name);
             submitData.append('description', formData.description);
+            submitData.append('category', 'General');
             submitData.append('image', selectedFile);
 
             await galleryService.uploadGalleryImage(submitData);

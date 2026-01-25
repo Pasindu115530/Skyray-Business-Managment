@@ -6,17 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Upload, X, Trash2, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
-export default function GalleryPage() {
-    interface GalleryImage {
-        id: number;
-        url: string;
-        name: string;
-        description: string;
-    }
+import { galleryService, GalleryItem } from '@/services/galleryService';
 
-    const [images, setImages] = useState<GalleryImage[]>([]);
+export default function GalleryPage() {
+    const [images, setImages] = useState<GalleryItem[]>([]);
     const [isUploadOpen, setIsUploadOpen] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     // Upload Form State
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -26,6 +22,22 @@ export default function GalleryPage() {
         description: ''
     });
 
+    useEffect(() => {
+        fetchImages();
+    }, []);
+
+    const fetchImages = async () => {
+        try {
+            const data = await galleryService.getGalleryImages();
+            setImages(data);
+        } catch (error) {
+            console.error('Failed to fetch gallery images', error);
+            toast.error('Failed to load gallery images');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
@@ -34,8 +46,8 @@ export default function GalleryPage() {
         }
     };
 
-    const handleSave = () => {
-        if (!selectedFile || !previewUrl) {
+    const handleSave = async () => {
+        if (!selectedFile) {
             toast.error('Please select an image');
             return;
         }
@@ -46,29 +58,42 @@ export default function GalleryPage() {
         }
 
         setUploading(true);
-        // Simulate API call
-        setTimeout(() => {
-            const newImage: GalleryImage = {
-                id: Date.now(),
-                url: previewUrl,
-                name: formData.name,
-                description: formData.description
-            };
-            setImages(prev => [newImage, ...prev]);
+        try {
+            const submitData = new FormData();
+            submitData.append('title', formData.name);
+            submitData.append('description', formData.description);
+            submitData.append('image', selectedFile);
+
+            await galleryService.uploadGalleryImage(submitData);
+
+            // Refresh list
+            await fetchImages();
 
             // Reset and Close
-            setUploading(false);
             setIsUploadOpen(false);
             setSelectedFile(null);
             setPreviewUrl(null);
             setFormData({ name: '', description: '' });
             toast.success('Image added successfully');
-        }, 800);
+        } catch (error) {
+            console.error('Upload failed', error);
+            toast.error('Failed to upload image');
+        } finally {
+            setUploading(false);
+        }
     };
 
-    const removeImage = (id: number) => {
-        setImages(prev => prev.filter(img => img.id !== id));
-        toast.success('Image removed');
+    const removeImage = async (id: number) => {
+        if (!confirm('Are you sure you want to delete this image?')) return;
+
+        try {
+            await galleryService.deleteGalleryImage(id);
+            setImages(prev => prev.filter(img => img.id !== id));
+            toast.success('Image removed');
+        } catch (error) {
+            console.error('Delete failed', error);
+            toast.error('Failed to delete image');
+        }
     };
 
     return (
@@ -106,14 +131,18 @@ export default function GalleryPage() {
                     </div>
                 </CardHeader>
                 <CardContent className="p-6">
-                    {images.length > 0 ? (
+                    {loading ? (
+                        <div className="flex justify-center py-12">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                        </div>
+                    ) : images.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {images.map((img) => (
                                 <div key={img.id} className="group flex flex-col bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
                                     <div className="relative aspect-square overflow-hidden bg-slate-100">
                                         <img
-                                            src={img.url}
-                                            alt={img.name}
+                                            src={img.image_path}
+                                            alt={img.title}
                                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                         />
                                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-start justify-end p-2 opacity-0 group-hover:opacity-100">
@@ -127,7 +156,7 @@ export default function GalleryPage() {
                                         </div>
                                     </div>
                                     <div className="p-3">
-                                        <h3 className="font-semibold text-slate-800 truncate" title={img.name}>{img.name}</h3>
+                                        <h3 className="font-semibold text-slate-800 truncate" title={img.title}>{img.title}</h3>
                                         <p className="text-xs text-slate-500 line-clamp-2 mt-1 h-8">
                                             {img.description || 'No description provided.'}
                                         </p>

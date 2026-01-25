@@ -30,9 +30,9 @@ export default function AdminLoginPage() {
         try {
             // Get CSRF cookie first
             await api.get('/sanctum/csrf-cookie');
-            
+
             // Then submit login
-            const response = await api.post('/api/login', data);
+            const response = await api.post('/api/admin/login', data);
             return response.data;
         } catch (error: unknown) {
             if (error && typeof error === 'object' && 'response' in error) {

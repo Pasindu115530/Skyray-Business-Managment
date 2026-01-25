@@ -42,9 +42,13 @@ class AdminAuthController extends Controller
             ]);
         }
 
+        $token = $admin->createToken('admin-token')->plainTextToken;
+
         return response()->json([
             'message' => 'Login successful',
-            'admin' => $admin
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+            'user' => array_merge($admin->toArray(), ['role' => 'admin']),
         ]);
     }
 }

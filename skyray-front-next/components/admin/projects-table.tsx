@@ -78,7 +78,7 @@ export default function ProjectsTable({ projects, onRefresh, isLoading }: Projec
                                         </div>
                                     </td>
                                 </tr>
-                            ) : projects.length === 0 ? (
+                            ) : (!projects || projects.length === 0) ? (
                                 <tr>
                                     <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
                                         No projects found. Add one above.

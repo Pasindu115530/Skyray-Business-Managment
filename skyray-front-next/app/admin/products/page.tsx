@@ -118,6 +118,11 @@ export default function AdminProductsPage() {
       data.append('sku', formData.sku);
 
       // Append images
+      if (imageFiles.length > 0) {
+        data.append('image', imageFiles[0]);
+      }
+      // Keep sending images[] if needed for future multiple image support, 
+      // but 'image' is required for current backend logic.
       imageFiles.forEach((file) => {
         data.append('images[]', file);
       });
@@ -232,22 +237,18 @@ export default function AdminProductsPage() {
                     <label className="text-sm font-medium text-slate-700">Category <span className="text-rose-500">*</span></label>
                     <div className="relative group">
                       <Tag className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
-                      <Input
+                      <select
                         name="category"
                         value={formData.category}
                         onChange={handleInputChange}
-                        placeholder="Select or Type..."
-                        list="categories"
-                        className="pl-9 focus-visible:ring-indigo-500"
+                        className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 transition-all pl-9"
                         required
-                      />
-                      <datalist id="categories">
-                        <option value="PLC" />
-                        <option value="VFD" />
-                        <option value="Relay" />
-                        <option value="HMI" />
-                        <option value="Circuit Breaker" />
-                      </datalist>
+                      >
+                        <option value="" disabled>Select Category</option>
+                        <option value="automation-equipment">Automation Equipment and Accessories</option>
+                        <option value="pneumatic-hydraulic">Pneumatic and Hydraulic Fittings and Accessories</option>
+                        <option value="electrical-switchgears">Electrical Switchgears and Panel Accessories</option>
+                      </select>
                     </div>
                   </div>
                   <div className="space-y-2">

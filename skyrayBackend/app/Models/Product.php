@@ -12,5 +12,9 @@ class Product extends Model
         'description',
         'image_url',
         'specifications',
+        'price',
+        'stock',
+        'sku',
+        'datasheet_path',
     ];
 }

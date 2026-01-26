@@ -111,7 +111,7 @@ export default function ProductsTable({ products, onRefresh, isLoading }: Produc
                                                 {product.category}
                                             </td>
                                             <td className="px-6 py-4 font-medium text-gray-900">
-                                                LKR {typeof product.price === 'string' ? parseFloat(product.price).toFixed(2) : product.price.toFixed(2)}
+                                                LKR {product.price !== undefined && product.price !== null ? (typeof product.price === 'string' ? parseFloat(product.price).toFixed(2) : product.price.toFixed(2)) : '0.00'}
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 

@@ -14,7 +14,7 @@ interface Project {
   client: string;
 }
 
-const categories = ['All Projects', 'Electrical Installations', 'Industrial Power Systems', 'Automation Solutions'];
+const categories = ['All Projects', 'Electrical Installations', 'Industrial Power Systems', 'Automation Solutions', 'Other'];
 
 export default function Projects() {
   const [selectedCategory, setSelectedCategory] = useState('All Projects');
@@ -28,14 +28,25 @@ export default function Projects() {
         if (response.ok) {
           const data = await response.json();
           // Map backend data to frontend interface
-          const mappedData = data.map((item: any) => ({
+          // Handle both array (legacy) and wrapped {data: []} response formats
+          const projectsArray = Array.isArray(data) ? data : (data.data || []);
+
+          if (!Array.isArray(projectsArray)) {
+            console.error('Projects data is not an array:', data);
+            setProjectsData([]);
+            return;
+          }
+
+          const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+
+          const mappedData = projectsArray.map((item: any) => ({
             id: item.id,
             title: item.title,
             category: item.category,
             description: item.description || '',
-            image: item.image_url || 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800', // Fallback image
-            year: new Date(item.start_date).getFullYear().toString(),
-            client: item.client_name,
+            image: item.thumbnail_path ? `${backendUrl}/storage/${item.thumbnail_path}` : 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800', // Corrected key to thumbnail_path
+            year: item.start_date ? new Date(item.start_date).getFullYear().toString() : new Date().getFullYear().toString(),
+            client: item.client_name || item.client || 'Client', // Handle multiple potential key names
           }));
           setProjectsData(mappedData);
         } else {

@@ -37,6 +37,7 @@ export default function AddProjectPage() {
         description: '',
         completion_date: '',
         status: 'In Progress',
+        category: 'Electrical Installations',
     });
 
     const [projects, setProjects] = useState<Project[]>([]);
@@ -46,7 +47,7 @@ export default function AddProjectPage() {
         setProjectsLoading(true);
         try {
             const response = await api.get('/api/projects');
-            setProjects(response.data.data);
+            setProjects(Array.isArray(response.data.data) ? response.data.data : []);
         } catch (error) {
             console.error('Failed to fetch projects', error);
             toast.error('Failed to fetch projects');
@@ -108,6 +109,7 @@ export default function AddProjectPage() {
             submitData.append('description', formData.description);
             submitData.append('completion_date', formData.completion_date);
             submitData.append('status', formData.status);
+            submitData.append('category', formData.category);
             if (thumbnail) {
                 submitData.append('thumbnail', thumbnail);
             }
@@ -131,6 +133,7 @@ export default function AddProjectPage() {
                 description: '',
                 completion_date: '',
                 status: 'In Progress',
+                category: 'Electrical Installations',
             });
             setThumbnail(null);
             setThumbnailPreview('');
@@ -238,6 +241,20 @@ export default function AddProjectPage() {
                                             onChange={handleInputChange}
                                         />
                                     </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-700">Category</label>
+                                    <select
+                                        name="category"
+                                        className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 transition-all"
+                                        value={formData.category}
+                                        onChange={handleInputChange}
+                                    >
+                                        <option>Electrical Installations</option>
+                                        <option>Industrial Power Systems</option>
+                                        <option>Automation Solutions</option>
+                                        <option>Other</option>
+                                    </select>
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium text-slate-700">Status</label>
@@ -349,6 +366,6 @@ export default function AddProjectPage() {
                     <ProjectsTable projects={projects} onRefresh={fetchProjects} isLoading={projectsLoading} />
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

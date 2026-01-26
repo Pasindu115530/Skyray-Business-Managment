@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ShoppingCart, Check } from 'lucide-react';
+import { ArrowLeft, FileText } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { productCategories } from '@/app/data/productsData';
 import Link from 'next/link';
@@ -15,6 +15,7 @@ interface Product {
   description: string;
   image_url: string | null;
   specifications: string | null;
+  datasheet_path: string | null;
 }
 
 function ProductContent() {
@@ -40,7 +41,9 @@ function ProductContent() {
         const response = await fetch(url);
         if (response.ok) {
           const data = await response.json();
-          setProducts(data);
+          // Handle wrapped response
+          const productsArray = Array.isArray(data) ? data : (data.data || []);
+          setProducts(productsArray);
         } else {
           console.error("Failed to fetch products");
         }
@@ -57,17 +60,20 @@ function ProductContent() {
   }, [categoryId]);
 
 
-  const handleAddToCart = (product: Product) => {
-    // In your final build, call your context addToCart here
-    setAddedProducts(new Set(addedProducts).add(product.id));
+  const [redirectingId, setRedirectingId] = useState<number | null>(null);
 
+  useEffect(() => {
+    if (products.length > 0) {
+      console.log("Products Debug:", products);
+    }
+  }, [products]);
+
+  const handleRequestQuote = (product: Product) => {
+    setRedirectingId(product.id);
+    // Add small delay for visual feedback
     setTimeout(() => {
-      setAddedProducts(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(product.id);
-        return newSet;
-      });
-    }, 2000);
+      router.push(`/main/quotation?product=${product.id}&name=${encodeURIComponent(product.name)}`);
+    }, 600);
   };
 
   if (!category) {
@@ -135,10 +141,11 @@ function ProductContent() {
                   <div className="relative h-64 overflow-hidden bg-gray-100">
                     {product.image_url ? (
                       <Image
-                        src={product.image_url}
+                        src={product.image_url ? (product.image_url.startsWith('http') ? product.image_url : `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'}${product.image_url.startsWith('/') ? '' : '/'}${product.image_url}`) : ''}
                         alt={product.name}
                         fill
                         className="object-cover"
+                        unoptimized
                       />
                     ) : (
                       <div className="flex items-center justify-center h-full text-gray-400">No Image</div>
@@ -159,20 +166,40 @@ function ProductContent() {
                       </div>
                     )}
 
-                    <button
-                      onClick={() => handleAddToCart(product)}
-                      disabled={addedProducts.has(product.id)}
-                      className={`w-full py-3 rounded-lg transition-all flex items-center justify-center space-x-2 ${addedProducts.has(product.id)
-                        ? 'bg-green-500 text-white'
-                        : 'bg-gradient-to-r from-blue-600 to-orange-500 text-white hover:shadow-lg'
-                        }`}
-                    >
-                      {addedProducts.has(product.id) ? (
-                        <><Check className="w-5 h-5" /><span>Added</span></>
-                      ) : (
-                        <><ShoppingCart className="w-5 h-5" /><span>Add to Cart</span></>
+                    <div className="flex flex-col gap-2 mt-auto">
+                      {product.datasheet_path && (
+                        <a
+                          href={product.datasheet_path.startsWith('http') ? product.datasheet_path : `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'}${product.datasheet_path.startsWith('/') ? '' : '/'}${product.datasheet_path}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full py-2.5 rounded-lg border border-blue-200 text-blue-600 hover:bg-blue-50 transition-all flex items-center justify-center space-x-2 text-sm font-medium"
+                        >
+                          <FileText className="w-4 h-4" />
+                          <span>Download Datasheet</span>
+                        </a>
                       )}
-                    </button>
+
+                      <button
+                        onClick={() => handleRequestQuote(product)}
+                        disabled={redirectingId === product.id}
+                        className={`w-full py-3 rounded-lg transition-all flex items-center justify-center space-x-2 font-medium ${redirectingId === product.id
+                          ? 'bg-indigo-500 text-white cursor-wait'
+                          : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-lg'
+                          }`}
+                      >
+                        {redirectingId === product.id ? (
+                          <>
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <span>Redirecting...</span>
+                          </>
+                        ) : (
+                          <>
+                            <FileText className="w-5 h-5" />
+                            <span>Request Quotation</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </motion.div>
               ))}

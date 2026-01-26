@@ -17,8 +17,22 @@ class ProductController extends Controller
              $query->where('category', $request->category);
         }
 
-        $products = $query->get();
-        return response()->json($products, 200);
+        $products = $query->get()->map(function ($product) {
+            return [
+                'id' => $product->id,
+                'category' => $product->category,
+                'name' => $product->name,
+                'description' => $product->description,
+                'image_url' => $product->image_url,
+                'specifications' => $product->specifications,
+                'price' => $product->price,
+                'stock' => $product->stock,
+                'sku' => $product->sku,
+                'datasheet_path' => $product->datasheet_path,
+                'created_at' => $product->created_at,
+            ];
+        });
+        return response()->json(['data' => $products], 200);
     }
 
     public function store(Request $request)
@@ -27,7 +41,13 @@ class ProductController extends Controller
             'category' => 'required|string',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'price' => 'required|numeric',
+            'stock' => 'required|integer',
+            'sku' => 'nullable|string|max:255',
+            'category' => 'required|string',
+            'category' => 'required|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
+            'datasheet' => 'nullable|mimes:pdf|max:10240', // 10MB max for PDF
             'specifications' => 'nullable|string', // JSON or text
         ]);
 
@@ -46,14 +66,32 @@ class ProductController extends Controller
             }
 
             $image->move($path, $imageName);
-            $imageUrl = url('products/' . $imageName);
+            $imageUrl = 'products/' . $imageName;
+        }
+
+        $datasheetPath = null;
+        if ($request->hasFile('datasheet')) {
+            $file = $request->file('datasheet');
+            $fileName = 'datasheet_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            
+            $path = public_path('datasheets');
+            if(!File::exists($path)) {
+                File::makeDirectory($path, 0755, true);
+            }
+
+            $file->move($path, $fileName);
+            $datasheetPath = 'datasheets/' . $fileName;
         }
 
         $product = Product::create([
             'category' => $request->category,
             'name' => $request->name,
             'description' => $request->description,
+            'price' => $request->price,
+            'stock' => $request->stock,
+            'sku' => $request->sku,
             'image_url' => $imageUrl,
+            'datasheet_path' => $datasheetPath,
             'specifications' => $request->specifications,
         ]);
 
@@ -93,10 +131,10 @@ class ProductController extends Controller
             $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
             $path = public_path('products');
             $image->move($path, $imageName);
-            $product->image_url = url('products/' . $imageName);
+            $product->image_url = 'products/' . $imageName;
         }
 
-        $product->update($request->only(['category', 'name', 'description', 'specifications']));
+        $product->update($request->only(['category', 'name', 'description', 'price', 'stock', 'sku', 'specifications']));
         if ($request->hasFile('image')) { // Ensure image_url is saved if updated
              $product->save();
         }

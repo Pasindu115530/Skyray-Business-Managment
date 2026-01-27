@@ -7,6 +7,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { productCategories } from '@/app/data/productsData';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useQuotation } from '@/app/context/QuotationContext';
+import { ShoppingBag, Check } from 'lucide-react';
 
 interface Product {
   id: number;
@@ -25,7 +27,7 @@ function ProductContent() {
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [addedProducts, setAddedProducts] = useState<Set<number>>(new Set());
+  const { addToQuote, items } = useQuotation();
 
   const category = productCategories.find(c => c.id === categoryId);
 
@@ -60,20 +62,19 @@ function ProductContent() {
   }, [categoryId]);
 
 
-  const [redirectingId, setRedirectingId] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (products.length > 0) {
-      console.log("Products Debug:", products);
-    }
-  }, [products]);
+  const [addedId, setAddedId] = useState<number | null>(null);
 
   const handleRequestQuote = (product: Product) => {
-    setRedirectingId(product.id);
-    // Add small delay for visual feedback
-    setTimeout(() => {
-      router.push(`/main/quotation?product=${product.id}&name=${encodeURIComponent(product.name)}`);
-    }, 600);
+    addToQuote({
+      id: product.id,
+      name: product.name,
+      image_url: product.image_url,
+      category: product.category,
+    });
+
+    // Show quick feedback
+    setAddedId(product.id);
+    setTimeout(() => setAddedId(null), 2000);
   };
 
   if (!category) {
@@ -181,21 +182,21 @@ function ProductContent() {
 
                       <button
                         onClick={() => handleRequestQuote(product)}
-                        disabled={redirectingId === product.id}
-                        className={`w-full py-3 rounded-lg transition-all flex items-center justify-center space-x-2 font-medium ${redirectingId === product.id
-                          ? 'bg-indigo-500 text-white cursor-wait'
+                        disabled={addedId === product.id}
+                        className={`w-full py-3 rounded-lg transition-all flex items-center justify-center space-x-2 font-medium ${addedId === product.id
+                          ? 'bg-green-600 text-white'
                           : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-lg'
                           }`}
                       >
-                        {redirectingId === product.id ? (
+                        {addedId === product.id ? (
                           <>
-                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            <span>Redirecting...</span>
+                            <Check className="w-5 h-5" />
+                            <span>Added to Quote</span>
                           </>
                         ) : (
                           <>
-                            <FileText className="w-5 h-5" />
-                            <span>Request Quotation</span>
+                            <ShoppingBag className="w-5 h-5" />
+                            <span>Add to Quote</span>
                           </>
                         )}
                       </button>

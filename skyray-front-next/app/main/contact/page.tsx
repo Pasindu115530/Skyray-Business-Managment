@@ -14,6 +14,8 @@ export default function ContactPage() {
   });
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -22,20 +24,42 @@ export default function ContactPage() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    // In a real application, you would send the data to a Next.js API route here
-    setTimeout(() => {
-      setSubmitted(false);
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        subject: '',
-        message: '',
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:8000';
+      const response = await fetch(`${backendUrl}/api/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(formData),
       });
-    }, 3000);
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSubmitted(true);
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          subject: '',
+          message: '',
+        });
+        setTimeout(() => setSubmitted(false), 5000);
+      } else {
+        setError(data.message || 'Failed to send message. Please try again.');
+      }
+    } catch (err) {
+      setError('Network error. Please check your connection and try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -95,7 +119,7 @@ export default function ContactPage() {
                           : '0 0 0 0px rgba(139, 21, 56, 0)',
                     }}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#8B1538] transition-colors"
-                    placeholder="John Doe"
+                    placeholder="Samira Dissanayaka"
                     required
                   />
                 </div>
@@ -120,7 +144,7 @@ export default function ContactPage() {
                           : '0 0 0 0px rgba(139, 21, 56, 0)',
                     }}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#8B1538] transition-colors"
-                    placeholder="john@example.com"
+                    placeholder="samira@example.com"
                     required
                   />
                 </div>
@@ -145,7 +169,7 @@ export default function ContactPage() {
                           : '0 0 0 0px rgba(139, 21, 56, 0)',
                     }}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#8B1538] transition-colors"
-                    placeholder="+1 (555) 123-4567"
+                    placeholder="+94 77 123 4567"
                   />
                 </div>
 
@@ -199,12 +223,36 @@ export default function ContactPage() {
                   />
                 </div>
 
+                {/* Error Message */}
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"
+                  >
+                    {error}
+                  </motion.div>
+                )}
+
+                {/* Success Message */}
+                {submitted && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm flex items-center gap-2"
+                  >
+                    <Check className="w-5 h-5" />
+                    Your message has been sent successfully! We will get back to you soon.
+                  </motion.div>
+                )}
+
                 {/* Submit Button */}
                 <motion.button
                   type="submit"
-                  className="group relative w-full py-4 bg-gradient-to-r from-[#8B1538] to-[#D4AF37] text-white rounded-lg overflow-hidden"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  disabled={isLoading}
+                  className={`group relative w-full py-4 bg-gradient-to-r from-[#8B1538] to-[#D4AF37] text-white rounded-lg overflow-hidden ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                  whileHover={isLoading ? {} : { scale: 1.02 }}
+                  whileTap={isLoading ? {} : { scale: 0.98 }}
                 >
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-r from-[#D4AF37] to-[#8B1538]"
@@ -213,8 +261,17 @@ export default function ContactPage() {
                     transition={{ duration: 0.3 }}
                   />
                   <span className="relative flex items-center justify-center space-x-2">
-                    <Send className="w-5 h-5" />
-                    <span>Send Message</span>
+                    {isLoading ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Sending...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-5 h-5" />
+                        <span>Send Message</span>
+                      </>
+                    )}
                   </span>
                 </motion.button>
               </form>
@@ -265,7 +322,7 @@ export default function ContactPage() {
                     <p className="text-gray-600">
                       Main: +94 76 660 4800<br />
                       Support: +94 77 793 2376<br />
-                     
+
                     </p>
                   </div>
                 </motion.div>
@@ -300,7 +357,7 @@ export default function ContactPage() {
                       Monday - Friday: 8:00 AM - 6:00 PM<br />
                       Saturday: 9:00 AM - 4:00 PM<br />
                       Sunday: Closed<br />
-             
+
                     </p>
                   </div>
                 </motion.div>
@@ -311,30 +368,30 @@ export default function ContactPage() {
       </section>
 
       {/* Map Section */}
-<section className="py-16 bg-white">
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6 }}
-      className="relative h-96 bg-gray-100 rounded-2xl overflow-hidden shadow-inner border border-gray-200"
-    >
-      {/* The iframe should be absolute inset-0 to fill the entire 
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="relative h-96 bg-gray-100 rounded-2xl overflow-hidden shadow-inner border border-gray-200"
+          >
+            {/* The iframe should be absolute inset-0 to fill the entire 
           motion.div container perfectly without showing gaps.
       */}
-      <iframe
-        title="Skyray Engineering Solutions Location"
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126668.95243455091!2d79.97448669277954!3d7.194572397114055!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae2fd7e3aa20e45%3A0x467458d7e19ef2f4!2sSkyray%20Engineering%20Solutins%20(Pvt)%20Ltd.!5e0!3m2!1sen!2slk!4v1767013581615!5m2!1sen!2slk"
-        className="absolute inset-0 w-full h-full"
-        style={{ border: 0 }}
-        allowFullScreen={true}
-        loading="lazy"
-        referrerPolicy="no-referrer-when-downgrade"
-      />
-    </motion.div>
-  </div>
-</section>
+            <iframe
+              title="Skyray Engineering Solutions Location"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126668.95243455091!2d79.97448669277954!3d7.194572397114055!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae2fd7e3aa20e45%3A0x467458d7e19ef2f4!2sSkyray%20Engineering%20Solutins%20(Pvt)%20Ltd.!5e0!3m2!1sen!2slk!4v1767013581615!5m2!1sen!2slk"
+              className="absolute inset-0 w-full h-full"
+              style={{ border: 0 }}
+              allowFullScreen={true}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </motion.div>
+        </div>
+      </section>
 
       {/* Electric Pulse Divider */}
       <div className="relative h-1 bg-gradient-to-r from-transparent via-[#8B1538] to-transparent">

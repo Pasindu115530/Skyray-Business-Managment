@@ -47,3 +47,6 @@ Route::post('/notifications/read-all', [NotificationController::class, 'markAllA
 
 use App\Http\Controllers\DashboardController;
 Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
+
+use App\Http\Controllers\ContactController;
+Route::post('/contact', [ContactController::class, 'send']);

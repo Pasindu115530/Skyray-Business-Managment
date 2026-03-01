@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\ContactFormMail;
+use App\Mail\ContactAcknowledgementMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
@@ -29,6 +30,9 @@ class ContactController extends Controller
             $recipientEmail = config('mail.from.address');
 
             Mail::to($recipientEmail)->send(new ContactFormMail($contactData));
+
+            // Send acknowledgement to the customer
+            Mail::to($contactData['email'])->send(new ContactAcknowledgementMail($contactData));
 
             return response()->json([
                 'message' => 'Your message has been sent successfully. We will get back to you soon!'

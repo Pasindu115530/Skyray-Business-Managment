@@ -85,4 +85,50 @@ class GalleryController extends Controller
 
         return response()->json(['message' => 'Image deleted successfully'], 200);
     }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, $id)
+    {
+        $gallery = Gallery::find($id);
+
+        if (!$gallery) {
+            return response()->json(['message' => 'Image not found'], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'title' => 'sometimes|required|string|max:255',
+            'description' => 'nullable|string',
+            'category' => 'sometimes|required|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        if ($request->hasFile('image')) {
+            // Delete old image
+            $oldFilename = basename($gallery->image_url);
+            $oldPath = public_path('gallery/' . $oldFilename);
+            if (File::exists($oldPath)) {
+                File::delete($oldPath);
+            }
+
+            $image = $request->file('image');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $path = public_path('gallery');
+            $image->move($path, $imageName);
+            $gallery->image_url = url('gallery/' . $imageName);
+        }
+
+        $gallery->update($request->only(['title', 'description', 'category']));
+
+        if ($request->hasFile('image')) {
+            $gallery->save();
+        }
+
+        return response()->json(['message' => 'Image updated successfully', 'data' => $gallery], 200);
+    }
 }

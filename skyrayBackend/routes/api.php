@@ -12,6 +12,7 @@ use App\Http\Controllers\GalleryController;
 Route::get('/gallery', [GalleryController::class, 'index']);
 Route::post('/gallery', [GalleryController::class, 'store']);
 Route::delete('/gallery/{id}', [GalleryController::class, 'destroy']);
+Route::match(['post', 'put'], '/gallery/{id}', [GalleryController::class, 'update']);
 
 use App\Http\Controllers\ProjectController;
 
@@ -24,7 +25,7 @@ use App\Http\Controllers\ProductController;
 Route::get('/products', [ProductController::class, 'index']);
 Route::post('/products', [ProductController::class, 'store']);
 Route::delete('/products/{id}', [ProductController::class, 'destroy']);
-Route::post('/products/{id}', [ProductController::class, 'update']);
+Route::match(['post', 'put'], '/products/{id}', [ProductController::class, 'update']);
 
 
 

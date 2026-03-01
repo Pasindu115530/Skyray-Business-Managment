@@ -49,7 +49,10 @@ export default function EditProductModal({ isOpen, onClose, product, onSuccess }
                 sku: product.sku || '',
             });
             // Initialize Gallery
-            setExistingImages(product.images || []);
+            const existingImgs = product.images && product.images.length > 0
+                ? product.images
+                : product.image_url ? [product.image_url] : [];
+            setExistingImages(existingImgs);
             setDeletedImages([]);
             setNewImages([]);
             setNewImagePreviews([]);

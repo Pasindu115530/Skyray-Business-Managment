@@ -17,6 +17,7 @@ export interface Product {
     price: number;
     description: string; // mapped from 'desc' in backend if needed, or 'description'
     category: string;
+    image_url?: string | null; // From backend API
     image?: string; // Legacy fallback
     images?: string[]; // New multiple images support
     datasheet_path?: string;

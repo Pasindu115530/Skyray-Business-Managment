@@ -3,23 +3,26 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Upload, X, Trash2, Image as ImageIcon } from 'lucide-react';
+import { Upload, X, Trash2, Edit2, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { galleryService, GalleryItem } from '@/services/galleryService';
+import EditGalleryModal from '@/components/admin/edit-gallery-modal';
 
 export default function GalleryPage() {
     const [images, setImages] = useState<GalleryItem[]>([]);
     const [isUploadOpen, setIsUploadOpen] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [editingItem, setEditingItem] = useState<GalleryItem | null>(null);
 
     // Upload Form State
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         name: '',
-        description: ''
+        description: '',
+        category: 'General'
     });
 
     useEffect(() => {
@@ -62,7 +65,7 @@ export default function GalleryPage() {
             const submitData = new FormData();
             submitData.append('title', formData.name);
             submitData.append('description', formData.description);
-            submitData.append('category', 'General');
+            submitData.append('category', formData.category);
             submitData.append('image', selectedFile);
 
             await galleryService.uploadGalleryImage(submitData);
@@ -74,7 +77,7 @@ export default function GalleryPage() {
             setIsUploadOpen(false);
             setSelectedFile(null);
             setPreviewUrl(null);
-            setFormData({ name: '', description: '' });
+            setFormData({ name: '', description: '', category: 'General' });
             toast.success('Image added successfully');
         } catch (error) {
             console.error('Upload failed', error);
@@ -119,66 +122,89 @@ export default function GalleryPage() {
                 </div>
             </div>
 
-            <Card className="border-slate-200 shadow-sm overflow-hidden">
-                <CardHeader className="bg-slate-50 border-b border-slate-100 pb-4">
-                    <div className="flex items-center gap-2">
-                        <div className="p-2 bg-indigo-100 rounded-lg text-indigo-600">
-                            <ImageIcon className="w-5 h-5" />
-                        </div>
-                        <div>
-                            <CardTitle className="text-lg font-bold text-slate-800">Gallery Images</CardTitle>
-                            <CardDescription className="text-slate-500">View and manage uploaded assets.</CardDescription>
-                        </div>
-                    </div>
-                </CardHeader>
-                <CardContent className="p-6">
-                    {loading ? (
-                        <div className="flex justify-center py-12">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-                        </div>
-                    ) : images.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {images.map((img) => (
-                                <div key={img.id} className="group flex flex-col bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all">
-                                    <div className="relative aspect-square overflow-hidden bg-slate-100">
-                                        <img
-                                            src={img.image_path}
-                                            alt={img.title}
-                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                        />
-                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-start justify-end p-2 opacity-0 group-hover:opacity-100">
-                                            <button
-                                                onClick={() => removeImage(img.id)}
-                                                className="p-1.5 bg-white text-rose-600 rounded-lg hover:bg-rose-50 transition-colors shadow-sm"
-                                                title="Delete Image"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
+            <div className="bg-white rounded-lg shadow border overflow-hidden">
+                <div className="p-4 border-b bg-gray-50">
+                    <h3 className="font-semibold text-gray-700">Gallery Images</h3>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm">
+                        <thead className="bg-gray-50 border-b">
+                            <tr>
+                                <th className="px-6 py-3 font-medium text-gray-500">Image</th>
+                                <th className="px-6 py-3 font-medium text-gray-500">Name</th>
+                                <th className="px-6 py-3 font-medium text-gray-500">Category</th>
+                                <th className="px-6 py-3 font-medium text-gray-500">Description</th>
+                                <th className="px-6 py-3 font-medium text-gray-500 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y">
+                            {loading ? (
+                                <tr>
+                                    <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                                        <div className="flex justify-center items-center">
+                                            <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                                            <span className="ml-2">Loading images...</span>
                                         </div>
-                                    </div>
-                                    <div className="p-3">
-                                        <h3 className="font-semibold text-slate-800 truncate" title={img.title}>{img.title}</h3>
-                                        <p className="text-xs text-slate-500 line-clamp-2 mt-1 h-8">
-                                            {img.description || 'No description provided.'}
-                                        </p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-16">
-                            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
-                                <ImageIcon className="w-8 h-8 text-slate-300" />
-                            </div>
-                            <h3 className="text-lg font-medium text-slate-900">No images yet</h3>
-                            <p className="text-slate-500 mt-1 mb-6">Upload images with details to get started.</p>
-                            <Button variant="outline" onClick={() => setIsUploadOpen(true)}>
-                                Add Your First Image
-                            </Button>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
+                                    </td>
+                                </tr>
+                            ) : images.length === 0 ? (
+                                <tr>
+                                    <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                                        No images found. Upload one above.
+                                    </td>
+                                </tr>
+                            ) : (
+                                images.map((img) => (
+                                    <tr key={img.id} className="hover:bg-gray-50 transition-colors">
+                                        <td className="px-6 py-4">
+                                            <div className="h-12 w-12 rounded-lg bg-gray-100 overflow-hidden shrink-0 border">
+                                                <img
+                                                    src={img.image_path}
+                                                    alt={img.title}
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="font-medium text-gray-900">{img.title}</span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            {img.category && (
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                                                    {img.category}
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4 text-gray-600 max-w-xs truncate">
+                                            {img.description || '-'}
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                    onClick={() => setEditingItem(img)}
+                                                >
+                                                    <Edit2 className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                    onClick={() => removeImage(img.id)}
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
             {/* Custom Modal for Upload */}
             {isUploadOpen && (
@@ -244,6 +270,22 @@ export default function GalleryPage() {
                                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                                 />
                             </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-700">Category <span className="text-rose-500">*</span></label>
+                                <select
+                                    className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                    value={formData.category}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                                >
+                                    <option>General</option>
+                                    <option>Electrical Installations</option>
+                                    <option>Industrial Power Systems</option>
+                                    <option>Automation Solutions</option>
+                                    <option>Gallery</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div className="px-6 py-4 bg-slate-50 flex justify-end gap-3 border-t border-slate-100">
@@ -257,6 +299,13 @@ export default function GalleryPage() {
                     </div>
                 </div>
             )}
+
+            <EditGalleryModal
+                isOpen={!!editingItem}
+                onClose={() => setEditingItem(null)}
+                item={editingItem}
+                onSuccess={fetchImages}
+            />
         </div>
     );
 }

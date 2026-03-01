@@ -5,6 +5,7 @@ export interface GalleryItem {
     title: string;
     description: string;
     image_path: string;
+    category?: string;
     created_at?: string;
 }
 
@@ -16,6 +17,15 @@ export const galleryService = {
 
     async uploadGalleryImage(formData: FormData): Promise<GalleryItem> {
         const response = await api.post('/api/gallery', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data.data;
+    },
+
+    async updateGalleryImage(id: number, formData: FormData): Promise<GalleryItem> {
+        const response = await api.post(`/api/gallery/${id}`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },

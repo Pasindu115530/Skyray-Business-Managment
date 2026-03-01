@@ -14,7 +14,7 @@ interface Project {
   client: string;
 }
 
-const categories = ['All Projects', 'Electrical Installations', 'Industrial Power Systems', 'Automation Solutions', 'Other'];
+const categories = ['All Projects', 'Electrical Installations', 'Industrial Power Systems', 'Automation Solutions', 'Gallery', 'Other'];
 
 export default function Projects() {
   const [selectedCategory, setSelectedCategory] = useState('All Projects');
@@ -164,12 +164,13 @@ export default function Projects() {
                     {/* Category Badge */}
                     <div className="absolute top-4 right-4">
                       <motion.div
-                        className="px-3 py-1 bg-gradient-to-r from-[#8B1538] to-[#D4AF37] text-white text-sm rounded-full"
+                        className="px-3 py-1 bg-gradient-to-r from-[#8B1538] to-[#D4AF37] text-white text-sm rounded-full flex items-center"
                         whileHover={{ scale: 1.1 }}
                       >
                         {project.category === 'Electrical Installations' && <Zap className="w-4 h-4 inline mr-1" />}
                         {project.category === 'Industrial Power Systems' && <Factory className="w-4 h-4 inline mr-1" />}
                         {project.category === 'Automation Solutions' && <Settings className="w-4 h-4 inline mr-1" />}
+                        <span>{project.category}</span>
                       </motion.div>
                     </div>
 

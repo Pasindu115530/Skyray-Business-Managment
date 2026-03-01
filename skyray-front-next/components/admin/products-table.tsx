@@ -40,7 +40,7 @@ export default function ProductsTable({ products, onRefresh, isLoading }: Produc
         if (product.images && product.images.length > 0) {
             return product.images[0];
         }
-        return product.image || null;
+        return product.image_url || product.image || null;
     };
 
     const getBackendUrl = (path: string) => {

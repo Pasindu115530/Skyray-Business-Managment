@@ -253,6 +253,7 @@ export default function AddProjectPage() {
                                         <option>Electrical Installations</option>
                                         <option>Industrial Power Systems</option>
                                         <option>Automation Solutions</option>
+                                        <option>Gallery</option>
                                         <option>Other</option>
                                     </select>
                                 </div>

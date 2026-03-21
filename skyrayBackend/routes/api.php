@@ -50,3 +50,10 @@ Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
 
 use App\Http\Controllers\ContactController;
 Route::post('/contact', [ContactController::class, 'send']);
+
+use App\Http\Controllers\QuotationController;
+Route::post('/quotation', [QuotationController::class, 'send']);
+
+Route::get('/admin/quotations', [QuotationController::class, 'index']);
+Route::post('/admin/quotations/{id}/reply', [QuotationController::class, 'reply']);
+Route::post('/admin/quotations/{id}/reject', [QuotationController::class, 'reject']);

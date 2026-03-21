@@ -17,6 +17,7 @@ export default function QuotationModal() {
         phone: '',
         message: ''
     });
+    const [error, setError] = useState('');
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -25,24 +26,43 @@ export default function QuotationModal() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
+        setError('');
 
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        try {
+            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:8000';
+            const response = await fetch(`${backendUrl}/api/quotation`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    contact: formData,
+                    items: items.map(item => ({
+                        name: item.name,
+                        quantity: item.quantity
+                    }))
+                }),
+            });
 
-        console.log("Submitting Quote Request:", {
-            contact: formData,
-            items: items
-        });
+            const data = await response.json();
 
-        setIsSubmitting(false);
-        setShowSuccess(true);
-
-        setTimeout(() => {
-            setShowSuccess(false);
-            clearQuote();
-            closeModal();
-            setFormData({ fullName: '', email: '', phone: '', message: '' });
-        }, 2000);
+            if (response.ok) {
+                setShowSuccess(true);
+                setTimeout(() => {
+                    setShowSuccess(false);
+                    clearQuote();
+                    closeModal();
+                    setFormData({ fullName: '', email: '', phone: '', message: '' });
+                }, 3000);
+            } else {
+                setError(data.message || 'Failed to send request. Please try again.');
+            }
+        } catch (err) {
+            setError('Network error. Please check your connection and try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     if (!isModalOpen) return null;
@@ -98,7 +118,7 @@ export default function QuotationModal() {
                                                 onChange={handleChange}
                                                 required
                                                 className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                                                placeholder="John Doe"
+                                                placeholder="Samira Dissanayaka"
                                             />
                                         </div>
 
@@ -112,7 +132,7 @@ export default function QuotationModal() {
                                                     onChange={handleChange}
                                                     required
                                                     className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                                                    placeholder="john@example.com"
+                                                    placeholder="samira@example.com"
                                                 />
                                             </div>
                                             <div>
@@ -124,7 +144,7 @@ export default function QuotationModal() {
                                                     onChange={handleChange}
                                                     required
                                                     className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                                                    placeholder="+1 (555) 000-0000"
+                                                    placeholder="+94 77 123 4567"
                                                 />
                                             </div>
                                         </div>
@@ -140,6 +160,12 @@ export default function QuotationModal() {
                                                 placeholder="Any specific requirements or questions?"
                                             />
                                         </div>
+
+                                        {error && (
+                                            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm mt-4">
+                                                {error}
+                                            </div>
+                                        )}
 
                                         <button
                                             type="submit"

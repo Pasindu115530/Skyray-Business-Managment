@@ -9,6 +9,8 @@ class Quotation extends Model
     protected $fillable = [
         'customer_name',
         'customer_email',
+        'customer_phone',
+        'message',
         'item_details',
         'status',
         'prices',

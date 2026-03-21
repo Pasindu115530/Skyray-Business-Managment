@@ -24,6 +24,7 @@ interface AuthContextType {
     logout: () => void;
     isAdmin: boolean;
     isCustomer: boolean;
+    setUserExternal: (user: any) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -82,6 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             logout,
             isAdmin,
             isCustomer,
+            setUserExternal: setUser as any,
         }}>
             {children}
         </AuthContext.Provider>

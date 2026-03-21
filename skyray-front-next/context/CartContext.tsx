@@ -99,7 +99,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const submitQuotationRequest = async (customerData: { name: string; email: string; phone: string; message: string }) => {
         // Map cart items to backend format: { product_id, quantity }
         const formattedItems = items.map(item => ({
-            product_id: parseInt(item.id), // Ensure ID is number for backend if needed, or keep string if backend supports UUID
+            product_id: item.id, // ID is string in Firestore
             quantity: item.quantity
         }));
 

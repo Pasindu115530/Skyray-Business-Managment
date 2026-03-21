@@ -4,8 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Zap, Settings, Factory, Filter } from 'lucide-react';
 
+import { projectService } from '@/services/projectService';
+
 interface Project {
-  id: number;
+  id: string;
   title: string;
   category: string;
   description: string;
@@ -24,34 +26,18 @@ export default function Projects() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/projects`);
-        if (response.ok) {
-          const data = await response.json();
-          // Map backend data to frontend interface
-          // Handle both array (legacy) and wrapped {data: []} response formats
-          const projectsArray = Array.isArray(data) ? data : (data.data || []);
-
-          if (!Array.isArray(projectsArray)) {
-            console.error('Projects data is not an array:', data);
-            setProjectsData([]);
-            return;
-          }
-
-          const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
-
-          const mappedData = projectsArray.map((item: any) => ({
-            id: item.id,
-            title: item.title,
-            category: item.category,
-            description: item.description || '',
-            image: item.thumbnail_path ? `${backendUrl}/storage/${item.thumbnail_path}` : 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800', // Corrected key to thumbnail_path
-            year: item.start_date ? new Date(item.start_date).getFullYear().toString() : new Date().getFullYear().toString(),
-            client: item.client_name || item.client || 'Client', // Handle multiple potential key names
-          }));
-          setProjectsData(mappedData);
-        } else {
-          console.error('Failed to fetch projects');
-        }
+        const data = await projectService.getProjects();
+        
+        const mappedData = data.map((item: any) => ({
+          id: item.id,
+          title: item.title,
+          category: item.category || 'Other',
+          description: item.description || '',
+          image: item.thumbnail_path || 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800',
+          year: item.completion_date ? new Date(item.completion_date).getFullYear().toString() : new Date().getFullYear().toString(),
+          client: item.client || 'Client',
+        }));
+        setProjectsData(mappedData);
       } catch (error) {
         console.error('Error fetching projects:', error);
       } finally {

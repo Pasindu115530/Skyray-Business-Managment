@@ -2,11 +2,11 @@
 import React, { useState } from 'react';
 import { Edit2, Trash2, Calendar, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { api } from '@/lib/api';
+import { projectService } from '@/services/projectService';
 import EditProjectModal from './edit-project-modal';
 
 interface Project {
-    id: number;
+    id: string;
     title: string;
     client: string;
     description: string;
@@ -25,10 +25,10 @@ import { toast } from 'sonner';
 
 export default function ProjectsTable({ projects, onRefresh, isLoading }: ProjectsTableProps) {
     const [editingProject, setEditingProject] = useState<Project | null>(null);
-    const [deletingId, setDeletingId] = useState<number | null>(null);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:8000';
 
-    const handleDelete = async (id: number) => {
+    const handleDelete = async (id: string) => {
         // ... (auth checks omitted for brevity in replacement if unchanged, but I need to include context to replace correctly)
         // Check for admin role in localStorage
         const userStr = localStorage.getItem('user');
@@ -40,7 +40,7 @@ export default function ProjectsTable({ projects, onRefresh, isLoading }: Projec
 
         try {
             setDeletingId(id);
-            await api.delete(`/api/projects/${id}`);
+            await projectService.deleteProject(id);
             toast.success('Project deleted successfully');
             onRefresh();
         } catch (error) {
@@ -92,7 +92,7 @@ export default function ProjectsTable({ projects, onRefresh, isLoading }: Projec
                                                 <div className="h-10 w-10 rounded-lg bg-gray-100 overflow-hidden shrink-0 border">
                                                     {project.thumbnail_path ? (
                                                         <img
-                                                            src={`${backendUrl}/storage/${project.thumbnail_path}`}
+                                                            src={project.thumbnail_path.startsWith('http') ? project.thumbnail_path : `${backendUrl}/storage/${project.thumbnail_path}`}
                                                             alt={project.title}
                                                             className="h-full w-full object-cover"
                                                         />

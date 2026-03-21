@@ -1,8 +1,9 @@
 "use client"; // Required for state management and framer-motion
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion'; // Standard Next.js framer-motion import
+import { motion, AnimatePresence } from 'framer-motion'; 
 import { Mail, Phone, MapPin, Send, Clock, Check } from 'lucide-react';
+import { contactService } from '@/services/contactService';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -30,31 +31,17 @@ export default function ContactPage() {
     setError('');
 
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:8000';
-      const response = await fetch(`${backendUrl}/api/contact`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify(formData),
+      await contactService.submitMessage(formData);
+
+      setSubmitted(true);
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: '',
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setSubmitted(true);
-        setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          subject: '',
-          message: '',
-        });
-        setTimeout(() => setSubmitted(false), 5000);
-      } else {
-        setError(data.message || 'Failed to send message. Please try again.');
-      }
+      setTimeout(() => setSubmitted(false), 5000);
     } catch (err) {
       setError('Network error. Please check your connection and try again.');
     } finally {

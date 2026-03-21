@@ -1,11 +1,11 @@
-
-import { api } from '@/lib/api';
+import { db } from '@/lib/firebase';
+import { collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 
 export const customerService = {
     getCustomers: async () => {
         try {
-            const response = await api.get('/api/customers');
-            return response.data;
+            const querySnapshot = await getDocs(collection(db, 'customers'));
+            return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         } catch (error) {
             console.error('Error fetching customers:', error);
             throw error;
@@ -14,28 +14,30 @@ export const customerService = {
 
     createCustomer: async (data: any) => {
         try {
-            const response = await api.post('/api/customers', data);
-            return response.data;
+            const docRef = await addDoc(collection(db, 'customers'), data);
+            return { id: docRef.id, ...data };
         } catch (error) {
             console.error('Error creating customer:', error);
             throw error;
         }
     },
 
-    updateCustomer: async (id: number, data: any) => {
+    updateCustomer: async (id: string, data: any) => {
         try {
-            const response = await api.put(`/api/customers/${id}`, data);
-            return response.data;
+            const docRef = doc(db, 'customers', id);
+            await updateDoc(docRef, data);
+            return { id, message: 'Customer updated successfully' };
         } catch (error) {
             console.error(`Error updating customer ${id}:`, error);
             throw error;
         }
     },
 
-    deleteCustomer: async (id: number) => {
+    deleteCustomer: async (id: string) => {
         try {
-            const response = await api.delete(`/api/customers/${id}`);
-            return response.data;
+            const docRef = doc(db, 'customers', id);
+            await deleteDoc(docRef);
+            return { message: 'Customer deleted successfully' };
         } catch (error) {
             console.error(`Error deleting customer ${id}:`, error);
             throw error;

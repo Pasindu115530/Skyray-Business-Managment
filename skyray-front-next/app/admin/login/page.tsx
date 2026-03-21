@@ -9,7 +9,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Shield, AlertTriangle } from 'lucide-react';
-import { api } from '@/lib/api';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '@/lib/firebase';
 
 export default function AdminLoginPage() {
     const [email, setEmail] = useState('');
@@ -26,85 +28,52 @@ export default function AdminLoginPage() {
         }
     }, [isAdmin, router]);
 
-    const handleLogin = async (data: { email: string; password: string }) => {
-        try {
-            // Get CSRF cookie first
-            await api.get('/sanctum/csrf-cookie');
-
-            // Then submit login
-            const response = await api.post('/api/admin/login', data);
-            return response.data;
-        } catch (error: unknown) {
-            if (error && typeof error === 'object' && 'response' in error) {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const axiosError = error as Record<string, any>;
-                if (axiosError.response && axiosError.response.data) {
-                    throw axiosError.response.data;
-                }
-            }
-            throw error;
-        }
-    };
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         setIsLoading(true);
 
         try {
-            const payload = {
-                email,
-                password,
-            };
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
 
-            const data = await handleLogin(payload);
-
-            // Store token (supports both 'token' and 'access_token' keys)
-            const token = (data as Record<string, unknown>).token as string | undefined ?? (data as Record<string, unknown>).access_token as string | undefined;
-            if (token) {
-                localStorage.setItem('token', token);
-                try {
-                    // Optionally set default Authorization header for subsequent requests
-                    // Lazy import to avoid SSR issues
-                    const { api } = await import('@/lib/api');
-                    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-                } catch {
-                    // no-op if import fails; requests will still read token via interceptor
-                }
+            // Fetch user role
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            const userData = userDoc.data();
+            
+            if (userData?.role !== 'admin') {
+                await auth.signOut();
+                throw new Error("Unauthorized. Admin access required.");
             }
 
+            const token = await user.getIdToken();
+            
+            if (token) {
+                localStorage.setItem('token', token);
+            }
+
+            const userObj = {
+                id: user.uid,
+                email: user.email || '',
+                name: userData?.firstName || userData?.name || 'Admin',
+                role: 'admin',
+                token,
+            };
+
             // Store user data
-            if (data.user) {
-                localStorage.setItem('user', JSON.stringify(data.user));
-                // Immediately update AuthContext so header reflects login without refresh
-                try {
-                    setUserExternal({
-                        id: (data.user as Record<string, unknown>).id as string | number,
-                        email: (data.user as Record<string, unknown>).email as string,
-                        name: (data.user as Record<string, unknown>).name as string,
-                        role: (data.user as Record<string, unknown>).role as any,
-                        token,
-                    });
-                } catch {
-                    // no-op
-                }
+            localStorage.setItem('user', JSON.stringify(userObj));
+            
+            // Immediately update AuthContext so header reflects login without refresh
+            try {
+                setUserExternal(userObj);
+            } catch {
+                // no-op
             }
 
             // Success - redirect to admin dashboard
             router.push('/admin');
-        } catch (err: unknown) {
-            // Laravel often returns validation errors under `errors` key
-            if (err && typeof err === 'object' && 'errors' in err) {
-                const errors = (err as Record<string, unknown>).errors as Record<string, any[]>;
-                const firstKey = Object.keys(errors)[0];
-                setError(errors[firstKey][0]);
-            } else if (err && typeof err === 'object' && 'message' in err) {
-                setError((err as Record<string, any>).message);
-            } else if (typeof err === 'string') {
-                setError(err);
-            } else {
-                setError('Login failed. Please check your credentials.');
-            }
+        } catch (err: any) {
+            setError(err.message || 'Login failed. Please check your credentials.');
         } finally {
             setIsLoading(false);
         }

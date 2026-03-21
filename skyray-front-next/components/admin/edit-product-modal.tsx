@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Save, Package, Tag, DollarSign, Package2, Image as ImageIcon, Grid3x3, Upload, FileText } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { api } from '@/lib/api';
+import { productService } from '@/services/productService';
 import { toast } from 'sonner';
 
 import { Product } from '@/types';
@@ -98,39 +98,20 @@ export default function EditProductModal({ isOpen, onClose, product, onSuccess }
         setIsLoading(true);
 
         try {
-            const data = new FormData();
-            data.append('name', formData.name);
-            data.append('description', formData.description);
-            data.append('price', formData.price);
-            data.append('category', formData.category);
-            data.append('stock', formData.stock);
-            data.append('sku', formData.sku);
-            // Since this is a PUT request, Laravel sometimes struggles with multipart/form-data on PUT.
-            // Standard workaround is sending POST with _method=PUT
-            data.append('_method', 'PUT');
-
-            if (newImages.length > 0) {
-                newImages.forEach((image, index) => {
-                    data.append(`images[${index}]`, image);
-                });
-            }
-
-            if (deletedImages.length > 0) {
-                deletedImages.forEach((path, index) => {
-                    data.append(`deleted_images[${index}]`, path);
-                });
-            }
-
-            if (datasheetFile) {
-                data.append('datasheet', datasheetFile);
-            }
-
-            // Using POST with _method=PUT
-            await api.post(`/api/products/${product.id}`, data, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
+            await productService.updateProduct(
+                product.id,
+                {
+                    name: formData.name,
+                    description: formData.description,
+                    price: formData.price,
+                    category: formData.category,
+                    stock: formData.stock,
+                    sku: formData.sku
                 },
-            });
+                existingImages,
+                newImages,
+                datasheetFile
+            );
 
             toast.success('Product updated successfully');
             onSuccess();
@@ -267,7 +248,7 @@ export default function EditProductModal({ isOpen, onClose, product, onSuccess }
                                     {existingImages.map((path, index) => (
                                         <div key={`existing-${index}`} className="relative aspect-square rounded-md overflow-hidden group border bg-white">
                                             <img
-                                                src={`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:8000'}${path.startsWith('/') ? '' : '/'}${path}`}
+                                                src={path.startsWith('http') ? path : `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:8000'}${path.startsWith('/') ? '' : '/'}${path}`}
                                                 alt="Product"
                                                 className="w-full h-full object-contain"
                                             />
@@ -324,7 +305,7 @@ export default function EditProductModal({ isOpen, onClose, product, onSuccess }
                                 {product?.datasheet_path && (
                                     <div className="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 p-2 rounded w-fit">
                                         <FileText className="h-4 w-4" />
-                                        <a href={`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:8000'}${product.datasheet_path.startsWith('/') ? '' : '/'}${product.datasheet_path}`} target="_blank" rel="noreferrer" className="underline">
+                                        <a href={product.datasheet_path?.startsWith('http') ? product.datasheet_path : `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:8000'}${product.datasheet_path.startsWith('/') ? '' : '/'}${product.datasheet_path}`} target="_blank" rel="noreferrer" className="underline">
                                             View Current Datasheet
                                         </a>
                                     </div>

@@ -1,11 +1,12 @@
-
-import { api } from '@/lib/api';
+import { db } from '@/lib/firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 export const settingService = {
     getSettings: async () => {
         try {
-            const response = await api.get('/api/settings');
-            return response.data;
+            const docRef = doc(db, 'settings', 'global');
+            const docSnap = await getDoc(docRef);
+            return docSnap.exists() ? docSnap.data().settings || [] : [];
         } catch (error) {
             console.error('Error fetching settings:', error);
             throw error;
@@ -14,8 +15,9 @@ export const settingService = {
 
     updateSettings: async (settings: any[]) => {
         try {
-            const response = await api.post('/api/settings', { settings });
-            return response.data;
+            const docRef = doc(db, 'settings', 'global');
+            await setDoc(docRef, { settings }, { merge: true });
+            return { message: 'Settings updated successfully' };
         } catch (error) {
             console.error('Error updating settings:', error);
             throw error;

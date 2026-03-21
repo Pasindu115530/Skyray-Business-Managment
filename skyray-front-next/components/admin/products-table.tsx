@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Edit2, Trash2, Package, FileText, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { api } from '@/lib/api';
+import { productService } from '@/services/productService';
 import EditProductModal from './edit-product-modal';
 import { toast } from 'sonner';
 import { Product } from '@/types';
@@ -24,7 +24,7 @@ export default function ProductsTable({ products, onRefresh, isLoading }: Produc
 
         try {
             setDeletingId(id);
-            await api.delete(`/api/products/${id}`);
+            await productService.deleteProduct(id);
             toast.success('Product deleted successfully');
             onRefresh();
         } catch (error: any) {
@@ -44,6 +44,7 @@ export default function ProductsTable({ products, onRefresh, isLoading }: Produc
     };
 
     const getBackendUrl = (path: string) => {
+        if (!path) return '';
         if (path.startsWith('http')) return path;
         const backend = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
         return `${backend}${path.startsWith('/') ? '' : '/'}${path}`;

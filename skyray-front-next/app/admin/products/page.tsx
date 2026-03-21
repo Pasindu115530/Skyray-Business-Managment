@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { api } from '@/lib/api';
 import ProductsTable from '@/components/admin/products-table';
 import { productService } from '@/services/productService';
 import { toast } from 'sonner';
@@ -109,34 +108,14 @@ export default function AdminProductsPage() {
         return;
       }
 
-      const data = new FormData();
-      data.append('name', formData.name);
-      data.append('description', formData.description);
-      data.append('price', formData.price);
-      data.append('category', formData.category);
-      data.append('stock', formData.stock);
-      data.append('sku', formData.sku);
-
-      // Append images
-      if (imageFiles.length > 0) {
-        data.append('image', imageFiles[0]);
-      }
-      // Keep sending images[] if needed for future multiple image support, 
-      // but 'image' is required for current backend logic.
-      imageFiles.forEach((file) => {
-        data.append('images[]', file);
-      });
-
-      // Append datasheet
-      if (datasheetFile) {
-        data.append('datasheet', datasheetFile);
-      }
-
-      await api.post('/api/products', data, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      await productService.createProduct({
+        name: formData.name,
+        description: formData.description,
+        price: formData.price,
+        category: formData.category,
+        stock: formData.stock,
+        sku: formData.sku
+      }, imageFiles, datasheetFile);
 
       toast.success('Product created successfully');
       router.refresh();

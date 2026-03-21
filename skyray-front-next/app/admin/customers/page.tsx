@@ -67,7 +67,7 @@ export default function CustomersPage() {
         }
     };
 
-    const handleDelete = async (id: number) => {
+    const handleDelete = async (id: string) => {
         if (!confirm('Are you sure?')) return;
         try {
             await customerService.deleteCustomer(id);

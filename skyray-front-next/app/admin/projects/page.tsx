@@ -7,13 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { api } from '@/lib/api';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import ProjectsTable from '@/components/admin/projects-table';
+import { projectService } from '@/services/projectService';
 import { toast } from 'sonner';
 
 interface Project {
-    id: number;
+    id: string;
     title: string;
     client: string;
     description: string;
@@ -46,8 +46,8 @@ export default function AddProjectPage() {
     const fetchProjects = async () => {
         setProjectsLoading(true);
         try {
-            const response = await api.get('/api/projects');
-            setProjects(Array.isArray(response.data.data) ? response.data.data : []);
+            const data = await projectService.getProjects();
+            setProjects(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error('Failed to fetch projects', error);
             toast.error('Failed to fetch projects');
@@ -103,25 +103,14 @@ export default function AddProjectPage() {
         const toastId = toast.loading('Saving project...');
 
         try {
-            const submitData = new FormData();
-            submitData.append('title', formData.title);
-            submitData.append('client', formData.client);
-            submitData.append('description', formData.description);
-            submitData.append('completion_date', formData.completion_date);
-            submitData.append('status', formData.status);
-            submitData.append('category', formData.category);
-            if (thumbnail) {
-                submitData.append('thumbnail', thumbnail);
-            }
-            galleryImages.forEach((image, index) => {
-                submitData.append(`project_images[${index}]`, image);
-            });
-
-            const response = await api.post('/api/projects', submitData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
+            await projectService.createProject({
+                title: formData.title,
+                client: formData.client,
+                description: formData.description,
+                completion_date: formData.completion_date,
+                status: formData.status,
+                category: formData.category
+            }, thumbnail, galleryImages);
 
             toast.success('Project added successfully!', { id: toastId });
 

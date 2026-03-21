@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 export interface QuotationItem {
-    id: number;
+    id: string;
     name: string;
     image_url: string | null;
     category: string;
@@ -13,8 +13,8 @@ export interface QuotationItem {
 interface QuotationContextType {
     items: QuotationItem[];
     addToQuote: (item: Omit<QuotationItem, 'quantity'>) => void;
-    removeFromQuote: (id: number) => void;
-    updateQuantity: (id: number, quantity: number) => void;
+    removeFromQuote: (id: string) => void;
+    updateQuantity: (id: string, quantity: number) => void;
     clearQuote: () => void;
     isModalOpen: boolean;
     openModal: () => void;
@@ -40,7 +40,7 @@ export function QuotationProvider({ children }: { children: ReactNode }) {
         setIsModalOpen(true);
     };
 
-    const updateQuantity = (id: number, quantity: number) => {
+    const updateQuantity = (id: string, quantity: number) => {
         setItems((prev) =>
             prev.map((item) =>
                 item.id === id ? { ...item, quantity: Math.max(1, quantity) } : item
@@ -48,7 +48,7 @@ export function QuotationProvider({ children }: { children: ReactNode }) {
         );
     };
 
-    const removeFromQuote = (id: number) => {
+    const removeFromQuote = (id: string) => {
         setItems((prev) => prev.filter((item) => item.id !== id));
     };
 

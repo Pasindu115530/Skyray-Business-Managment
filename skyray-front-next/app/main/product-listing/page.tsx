@@ -9,9 +9,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useQuotation } from '@/app/context/QuotationContext';
 import { ShoppingBag, Check } from 'lucide-react';
+import { productService } from '@/services/productService';
 
 interface Product {
-  id: number;
+  id: string;
   category: string;
   name: string;
   description: string;
@@ -35,20 +36,17 @@ function ProductContent() {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        // Fetch products, optionally filtering by category if provided
-        const url = categoryId
-          ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/products?category=${encodeURIComponent(categoryId)}`
-          : `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/products`;
-
-        const response = await fetch(url);
-        if (response.ok) {
-          const data = await response.json();
-          // Handle wrapped response
-          const productsArray = Array.isArray(data) ? data : (data.data || []);
-          setProducts(productsArray);
-        } else {
-          console.error("Failed to fetch products");
-        }
+        const data = await productService.getProducts();
+        const filtered = categoryId ? data.filter(p => p.category === categoryId) : data;
+        
+        // Map to expected structure and ensure string ID
+        const mappedData = filtered.map(p => ({
+          ...p,
+          id: p.id as string,
+          image_url: p.image || (p.images && p.images.length > 0 ? p.images[0] : null)
+        })) as unknown as Product[];
+        
+        setProducts(mappedData);
       } catch (error) {
         console.error("Error fetching products:", error);
       } finally {
@@ -62,7 +60,7 @@ function ProductContent() {
   }, [categoryId]);
 
 
-  const [addedId, setAddedId] = useState<number | null>(null);
+  const [addedId, setAddedId] = useState<string | null>(null);
 
   const handleRequestQuote = (product: Product) => {
     addToQuote({
@@ -142,7 +140,7 @@ function ProductContent() {
                   <div className="relative h-64 overflow-hidden bg-gray-100">
                     {product.image_url ? (
                       <Image
-                        src={product.image_url ? (product.image_url.startsWith('http') ? product.image_url : `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'}${product.image_url.startsWith('/') ? '' : '/'}${product.image_url}`) : ''}
+                        src={product.image_url}
                         alt={product.name}
                         fill
                         className="object-cover"
@@ -170,7 +168,7 @@ function ProductContent() {
                     <div className="flex flex-col gap-2 mt-auto">
                       {product.datasheet_path && (
                         <a
-                          href={product.datasheet_path.startsWith('http') ? product.datasheet_path : `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'}${product.datasheet_path.startsWith('/') ? '' : '/'}${product.datasheet_path}`}
+                          href={product.datasheet_path}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="w-full py-2.5 rounded-lg border border-blue-200 text-blue-600 hover:bg-blue-50 transition-all flex items-center justify-center space-x-2 text-sm font-medium"

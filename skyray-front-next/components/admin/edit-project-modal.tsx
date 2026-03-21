@@ -3,11 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, Save, X, Calendar, User } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { api } from '@/lib/api';
+import { projectService } from '@/services/projectService';
 import { toast } from 'sonner';
 
 interface Project {
-    id: number;
+    id: string;
     title: string;
     client: string;
     description: string;
@@ -53,7 +53,7 @@ export default function EditProjectModal({ isOpen, onClose, project, onSuccess }
                 completion_date: project.completion_date || '',
                 status: project.status || 'In Progress',
             });
-            setThumbnailPreview(project.thumbnail_path ? `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:8000'}/storage/${project.thumbnail_path}` : '');
+            setThumbnailPreview(project.thumbnail_path ? (project.thumbnail_path.startsWith('http') ? project.thumbnail_path : `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:8000'}/storage/${project.thumbnail_path}`) : '');
 
             // Initialize Gallery
             setExistingGalleryImages(project.project_image_urls || []);
@@ -113,32 +113,19 @@ export default function EditProjectModal({ isOpen, onClose, project, onSuccess }
         setIsLoading(true);
 
         try {
-            const submitData = new FormData();
-            submitData.append('_method', 'PUT'); // Laravel method spoofing
-            submitData.append('title', formData.title);
-            submitData.append('client', formData.client);
-            submitData.append('description', formData.description);
-            submitData.append('completion_date', formData.completion_date);
-            submitData.append('status', formData.status);
-            if (thumbnail) {
-                submitData.append('thumbnail', thumbnail);
-            }
-
-            // Append deleted images
-            deletedGalleryImages.forEach((path, index) => {
-                submitData.append(`deleted_images[${index}]`, path);
-            });
-
-            // Append new gallery images
-            newGalleryImages.forEach((image, index) => {
-                submitData.append(`project_images[${index}]`, image);
-            });
-
-            await api.post(`/api/projects/${project.id}`, submitData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
+            await projectService.updateProject(
+                project.id,
+                {
+                    title: formData.title,
+                    client: formData.client,
+                    description: formData.description,
+                    completion_date: formData.completion_date,
+                    status: formData.status
                 },
-            });
+                thumbnail,
+                existingGalleryImages,
+                newGalleryImages
+            );
 
             toast.success('Project updated successfully');
             onSuccess();
@@ -268,7 +255,7 @@ export default function EditProjectModal({ isOpen, onClose, project, onSuccess }
                                 {existingGalleryImages.map((path, index) => (
                                     <div key={`existing-${index}`} className="relative aspect-square rounded-md overflow-hidden group border bg-white">
                                         <img
-                                            src={`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:8000'}/storage/${path}`}
+                                            src={path.startsWith('http') ? path : `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:8000'}/storage/${path}`}
                                             alt="Gallery"
                                             className="w-full h-full object-cover"
                                         />

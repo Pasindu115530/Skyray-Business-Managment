@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, Send, ShoppingBag, Plus, Minus } from 'lucide-react';
 import Image from 'next/image';
 import { useQuotation } from '../context/QuotationContext';
+import { quotationService } from '@/services/quotationService';
 
 export default function QuotationModal() {
     const { isModalOpen, closeModal, items, removeFromQuote, updateQuantity, clearQuote } = useQuotation();
@@ -29,35 +30,25 @@ export default function QuotationModal() {
         setError('');
 
         try {
-            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:8000';
-            const response = await fetch(`${backendUrl}/api/quotation`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({
-                    contact: formData,
-                    items: items.map(item => ({
-                        name: item.name,
-                        quantity: item.quantity
-                    }))
-                }),
+            await quotationService.createQuotationRequest({
+                name: formData.fullName,
+                email: formData.email,
+                phone: formData.phone,
+                message: formData.message,
+                items: items.map(item => ({
+                    product_id: item.id.toString(), // Support string ID
+                    product_name: item.name,
+                    quantity: item.quantity
+                })) as any
             });
 
-            const data = await response.json();
-
-            if (response.ok) {
-                setShowSuccess(true);
-                setTimeout(() => {
-                    setShowSuccess(false);
-                    clearQuote();
-                    closeModal();
-                    setFormData({ fullName: '', email: '', phone: '', message: '' });
-                }, 3000);
-            } else {
-                setError(data.message || 'Failed to send request. Please try again.');
-            }
+            setShowSuccess(true);
+            setTimeout(() => {
+                setShowSuccess(false);
+                clearQuote();
+                closeModal();
+                setFormData({ fullName: '', email: '', phone: '', message: '' });
+            }, 3000);
         } catch (err) {
             setError('Network error. Please check your connection and try again.');
         } finally {

@@ -23,7 +23,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { quotationService, Quotation } from '@/app/services/quotationService';
+import { quotationService, Quotation } from '@/services/quotationService';
 import { toast } from 'sonner';
 
 export default function AdminQuotationsPage() {
@@ -44,8 +44,8 @@ export default function AdminQuotationsPage() {
     const fetchQuotations = async () => {
         setLoading(true);
         try {
-            const data = await quotationService.getAll();
-            setQuotations(data);
+            const data = await quotationService.getQuotationRequests();
+            setQuotations(data.data);
         } catch (error) {
             console.log(error);
             toast.error('Failed to load quotations');
@@ -73,10 +73,10 @@ export default function AdminQuotationsPage() {
         }
     };
 
-    const handleReject = async (id: number) => {
+    const handleReject = async (id: string) => {
         if (!confirm('Are you sure you want to reject this quotation? The customer will be informed.')) return;
         try {
-            await quotationService.reject(id);
+            await quotationService.rejectRequest(id);
             toast.success('Quotation rejected successfully');
             fetchQuotations();
         } catch (error) {
@@ -94,7 +94,11 @@ export default function AdminQuotationsPage() {
 
         setIsReplying(true);
         try {
-            await quotationService.reply(selectedQuotation.id, replyMessage, replyPdfFile);
+            await quotationService.replyToRequest(selectedQuotation.id, {
+                message: replyMessage,
+                mode: replyPdfFile ? 'upload' : 'create',
+                file: replyPdfFile || undefined
+            });
             toast.success('Quotation reply sent successfully');
             setIsReplyModalOpen(false);
             setReplyMessage('');

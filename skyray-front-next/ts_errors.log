@@ -1,0 +1,13 @@
+﻿app/admin/customers/page.tsx(73,50): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+app/admin/gallery/page.tsx(94,53): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+app/admin/gallery/page.tsx(95,50): error TS2367: This comparison appears to be unintentional because the types 'string' and 'number' have no overlap.
+app/admin/gallery/page.tsx(195,80): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+app/services/quotationService.ts(1,21): error TS2307: Cannot find module '@/lib/api' or its corresponding type declarations.
+components/admin/quotation-details-modal.tsx(43,52): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+components/admin/quotation-details-modal.tsx(65,52): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+context/CartContext.tsx(112,59): error TS2345: Argument of type '{ items: { product_id: number; quantity: number; }[]; name: string; email: string; phone: string; message: string; }' is not assignable to parameter of type '{ name: string; email: string; phone: string; message: string; items: { product_id: string; quantity: number; }[]; }'.
+  Types of property 'items' are incompatible.
+    Type '{ product_id: number; quantity: number; }[]' is not assignable to type '{ product_id: string; quantity: number; }[]'.
+      Type '{ product_id: number; quantity: number; }' is not assignable to type '{ product_id: string; quantity: number; }'.
+        Types of property 'product_id' are incompatible.
+          Type 'number' is not assignable to type 'string'.

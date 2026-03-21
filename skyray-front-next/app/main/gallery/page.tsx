@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Image, X, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
+import { galleryService } from '@/services/galleryService';
 
 interface GalleryImage {
-  id: number;
+  id: string;
   url: string;
   category: string;
   title: string;
@@ -24,21 +25,15 @@ export default function Gallery() {
   useEffect(() => {
     const fetchImages = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/gallery`);
-        if (response.ok) {
-          const data = await response.json();
-          // Map backend data to frontend interface
-          const mappedData = data.map((item: any) => ({
-            id: item.id,
-            url: item.image_url,
-            category: item.category,
-            title: item.title,
-            description: item.description || '',
-          }));
-          setGalleryImages(mappedData);
-        } else {
-          console.error('Failed to fetch images');
-        }
+        const data = await galleryService.getGalleryImages();
+        const mappedData = data.map((item: any) => ({
+          id: item.id,
+          url: item.image_url,
+          category: item.category,
+          title: item.title,
+          description: item.description || '',
+        }));
+        setGalleryImages(mappedData);
       } catch (error) {
         console.error('Error fetching images:', error);
       } finally {

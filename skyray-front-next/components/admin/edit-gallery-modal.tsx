@@ -52,22 +52,24 @@ export default function EditGalleryModal({ isOpen, onClose, item, onSuccess }: E
 
         setIsLoading(true);
         try {
-            const submitData = new FormData();
-            submitData.append('title', formData.title);
-            submitData.append('description', formData.description);
-            submitData.append('category', formData.category);
-            submitData.append('_method', 'PUT');
+            const data = {
+                title: formData.title,
+                description: formData.description,
+                category: formData.category
+            };
 
-            if (selectedFile) {
-                submitData.append('image', selectedFile);
-            }
+            await galleryService.updateGalleryImage(
+                item.id, 
+                data, 
+                selectedFile || undefined, 
+                item.storage_path
+            );
 
-            await galleryService.updateGalleryImage(item.id, submitData);
             toast.success('Image updated successfully');
             onSuccess();
             onClose();
         } catch (err: any) {
-            const errorMessage = err.response?.data?.message || err.message || 'Failed to update image';
+            const errorMessage = err.message || 'Failed to update image';
             toast.error(errorMessage);
         } finally {
             setIsLoading(false);

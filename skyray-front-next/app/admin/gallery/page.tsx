@@ -50,48 +50,34 @@ export default function GalleryPage() {
     };
 
     const handleSave = async () => {
-        if (!selectedFile) {
-            toast.error('Please select an image');
-            return;
-        }
+    if (!selectedFile || !formData.name) return;
 
-        if (!formData.name) {
-            toast.error('Please enter an image name');
-            return;
-        }
+    setUploading(true);
+    try {
+        const data = {
+            title: formData.name,
+            description: formData.description,
+            category: formData.category
+        };
 
-        setUploading(true);
-        try {
-            const submitData = new FormData();
-            submitData.append('title', formData.name);
-            submitData.append('description', formData.description);
-            submitData.append('category', formData.category);
-            submitData.append('image', selectedFile);
+        // Service එකට file එක සහ data යැවීම
+        await galleryService.uploadGalleryImage(selectedFile, data);
 
-            await galleryService.uploadGalleryImage(submitData);
+        toast.success('Image added successfully');
+        setIsUploadOpen(false);
+        fetchImages();
+    } catch (error) {
+        toast.error('Upload failed');
+    } finally {
+        setUploading(false);
+    }
+};
 
-            // Refresh list
-            await fetchImages();
-
-            // Reset and Close
-            setIsUploadOpen(false);
-            setSelectedFile(null);
-            setPreviewUrl(null);
-            setFormData({ name: '', description: '', category: 'General' });
-            toast.success('Image added successfully');
-        } catch (error) {
-            console.error('Upload failed', error);
-            toast.error('Failed to upload image');
-        } finally {
-            setUploading(false);
-        }
-    };
-
-    const removeImage = async (id: string) => {
+    const removeImage = async (id: string, storagePath: string) => {
         if (!confirm('Are you sure you want to delete this image?')) return;
 
         try {
-            await galleryService.deleteGalleryImage(id);
+            await galleryService.deleteGalleryImage(id, storagePath);
             setImages(prev => prev.filter(img => img.id !== id));
             toast.success('Image removed');
         } catch (error) {
@@ -192,7 +178,7 @@ export default function GalleryPage() {
                                                     variant="ghost"
                                                     size="sm"
                                                     className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                    onClick={() => removeImage(img.id)}
+                                                    onClick={() => removeImage(img.id, img.storage_path)}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>

@@ -1,81 +1,85 @@
-import { db, storage } from '@/lib/firebase';
-import { collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { db, auth } from '@/lib/firebase';
+import { storage } from '@/lib/firebase'; // storage එක import කරන්න (lib/firebase.ts එකේ තිබිය යුතුයි)
+import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
 export interface GalleryItem {
     id: string;
     title: string;
     description: string;
-    image_path: string;
-    category?: string;
-    created_at?: string;
+    category: string;
+    image_path: string; // මෙය Firebase download URL එක වේ
+    storage_path: string; // පසුව delete කිරීමට අවශ්‍ය වේ
 }
 
 export const galleryService = {
+    // 1. පින්තූරයක් Upload කිරීම
+    async uploadGalleryImage(file: File, data: any) {
+        // පින්තූරය Storage එකට Upload කිරීම
+        const storageRef = ref(storage, `gallery/${Date.now()}_${file.name}`);
+        await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(storageRef);
+
+        // විස්තර Firestore එකට Save කිරීම (Gallery Table එක මෙන්න)
+        return await addDoc(collection(db, "gallery"), {
+            title: data.title,
+            description: data.description,
+            category: data.category,
+            image_path: downloadURL,
+            storage_path: storageRef.fullPath,
+            createdAt: new Date()
+        });
+    },
+
+    // 2. සියලුම පින්තූර ලබා ගැනීම
     async getGalleryImages(): Promise<GalleryItem[]> {
-        const querySnapshot = await getDocs(collection(db, 'gallery'));
-        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as GalleryItem));
+        const q = query(collection(db, "gallery"), orderBy("createdAt", "desc"));
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        })) as GalleryItem[];
     },
 
-    async uploadGalleryImage(formData: FormData): Promise<GalleryItem> {
-        const file = formData.get('image') as File;
-        const title = formData.get('title') as string || '';
-        const description = formData.get('description') as string || '';
-        const category = formData.get('category') as string || '';
+    // 3. පින්තූරයක් Delete කිරීම
+    async deleteGalleryImage(id: string, storagePath: string) {
+        // Storage එකෙන් පින්තූරය අයින් කිරීම
+        const fileRef = ref(storage, storagePath);
+        await deleteObject(fileRef);
+        // Firestore එකෙන් දත්තය අයින් කිරීම
+        await deleteDoc(doc(db, "gallery", id));
+    },
 
-        let image_path = '';
-        if (file) {
-            const storageRef = ref(storage, `gallery/${Date.now()}_${file.name}`);
-            const snapshot = await uploadBytes(storageRef, file);
-            image_path = await getDownloadURL(snapshot.ref);
-        }
-
-        const newDoc = {
-            title,
-            description,
-            category,
-            image_path,
-            created_at: new Date().toISOString()
+    // 4. පින්තූරයක් Update කිරීම
+    async updateGalleryImage(id: string, data: { title: string; description: string; category: string }, file?: File, oldStoragePath?: string) {
+        let updateData: any = {
+            title: data.title,
+            description: data.description,
+            category: data.category,
+            updatedAt: new Date()
         };
-        const docRef = await addDoc(collection(db, 'gallery'), newDoc);
-        return { id: docRef.id, ...newDoc } as GalleryItem;
-    },
 
-    async updateGalleryImage(id: string, formData: FormData): Promise<GalleryItem> {
-        const file = formData.get('image') as File | null;
-        const title = formData.get('title') as string || '';
-        const description = formData.get('description') as string || '';
-        const category = formData.get('category') as string || '';
-
-        const updateData: any = { title, description, category };
-
-        if (file && file.size > 0) {
+        if (file) {
+            // New image upload
             const storageRef = ref(storage, `gallery/${Date.now()}_${file.name}`);
-            const snapshot = await uploadBytes(storageRef, file);
-            updateData.image_path = await getDownloadURL(snapshot.ref);
-        }
+            await uploadBytes(storageRef, file);
+            const downloadURL = await getDownloadURL(storageRef);
+            
+            updateData.image_path = downloadURL;
+            updateData.storage_path = storageRef.fullPath;
 
-        const docRef = doc(db, 'gallery', id);
-        await updateDoc(docRef, updateData);
-        
-        const docSnap = await getDoc(docRef);
-        return { id, ...docSnap.data() } as GalleryItem;
-    },
-
-    async deleteGalleryImage(id: string): Promise<void> {
-        const docRef = doc(db, 'gallery', id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-            const data = docSnap.data();
-            if (data.image_path && data.image_path.includes('firebasestorage')) {
+            // Delete old image if exists
+            if (oldStoragePath) {
                 try {
-                    const imageRef = ref(storage, data.image_path);
-                    await deleteObject(imageRef);
-                } catch (e) {
-                    console.error("Could not delete image from storage", e);
+                    const oldFileRef = ref(storage, oldStoragePath);
+                    await deleteObject(oldFileRef);
+                } catch (error) {
+                    console.error("Failed to delete old image", error);
                 }
             }
-            await deleteDoc(docRef);
         }
+
+        const docRef = doc(db, "gallery", id);
+        await updateDoc(docRef, updateData);
     }
 };

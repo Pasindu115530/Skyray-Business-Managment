@@ -1,110 +1,93 @@
 import { db, storage } from '@/lib/firebase';
-import { collection, doc, getDoc, getDocs, addDoc, updateDoc, query, where } from 'firebase/firestore';
+import { 
+  collection, getDocs, doc, updateDoc, deleteDoc, 
+  query, orderBy, getDoc, addDoc, serverTimestamp 
+} from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { Quotation } from '../types/quotation';
 
-export type { Quotation };
+export interface Quotation {
+    id: string;
+    customer_name: string;
+    customer_email: string;
+    customer_phone?: string;
+    message?: string;
+    status: 'pending' | 'replied' | 'rejected';
+    item_details: Array<{ name: string; quantity: number }>;
+    created_at: any;
+}
 
 export const quotationService = {
-    async getQuotations(): Promise<Quotation[]> {
-        const querySnapshot = await getDocs(collection(db, 'quotations'));
-        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
-    },
-
-    async getQuotationById(id: string): Promise<Quotation> {
-        const docRef = doc(db, 'quotations', id);
-        const docSnap = await getDoc(docRef);
-        if (!docSnap.exists()) throw new Error('Quotation not found');
-        return { id: docSnap.id, ...docSnap.data() } as any;
-    },
-
-    async updateQuotation(id: string, data: Partial<Quotation>): Promise<Quotation> {
-        const docRef = doc(db, 'quotations', id);
-        await updateDoc(docRef, data);
-        const docSnap = await getDoc(docRef);
-        return { id: docSnap.id, ...docSnap.data() } as any;
-    },
-
-    async getQuotationRequests(page: number = 1, status?: string): Promise<any> {
-        let q = collection(db, 'quotation_requests') as any;
-        if (status) {
-            q = query(q, where('status', '==', status));
-        }
+    // 1. සියලුම Quotation Requests ලබා ගැනීම
+    async getQuotationRequests() {
+        const q = query(collection(db, "quotations"), orderBy("submittedAt", "desc"));
         const querySnapshot = await getDocs(q);
-        const requests = querySnapshot.docs.map(doc => {
-            const data = doc.data() as any;
+        
+        const data = querySnapshot.docs.map(doc => {
+            const d = doc.data();
             return {
                 id: doc.id,
-                ...data,
-                customer_name: data.name,
-                customer_email: data.email,
-                customer_phone: data.phone,
-                item_details: data.items,
-                created_at: data.createdAt || new Date().toISOString()
+                customer_name: d.name,
+                customer_email: d.email,
+                customer_phone: d.phone,
+                message: d.message,
+                status: d.status || 'pending',
+                // Items array එක item_details ලෙස map කිරීම
+                item_details: d.items?.map((i: any) => ({
+                    name: i.product_name || `Product ID: ${i.product_id}`,
+                    quantity: i.quantity
+                })) || [],
+                created_at: d.submittedAt?.toDate() || new Date(),
             };
         });
-        return {
-            data: requests,
-            current_page: 1, // basic mock for pagination
-            last_page: 1
-        };
+        return { data };
     },
 
-    async rejectRequest(id: string): Promise<any> {
-        const docRef = doc(db, 'quotation_requests', id);
-        await updateDoc(docRef, { status: 'rejected', repliedAt: new Date().toISOString() });
-        return { message: 'Quotation request rejected' };
+    // 2. ඉල්ලීමක් ප්‍රතික්ෂේප කිරීම (Reject)
+    async rejectRequest(id: string) {
+        const docRef = doc(db, "quotations", id);
+        return await updateDoc(docRef, { status: 'rejected' });
     },
 
-    async createQuotationRequest(data: { name: string, email: string, phone: string, message: string, items: { product_id: string, quantity: number }[] }): Promise<any> {
-        const newDoc = { ...data, status: 'pending', createdAt: new Date().toISOString() };
-        const docRef = await addDoc(collection(db, 'quotation_requests'), newDoc);
-        return { message: 'Quotation request submitted', id: docRef.id };
-    },
+    // 3. පාරිභෝගිකයාට පිළිතුරු යැවීම (Reply)
+    async replyToRequest(id: string, replyData: { message: string; mode: string; file?: File }) {
+        let pdfUrl = null;
 
-    async replyToRequest(id: string, data: { items?: any[], message: string, mode?: 'create' | 'upload', file?: File }): Promise<any> {
-        const docRef = doc(db, 'quotation_requests', id);
-        let fileUrl = '';
-
-        if (data.mode === 'upload' && data.file) {
-            const storageRef = ref(storage, `quotations/${Date.now()}_${data.file.name}`);
-            const snapshot = await uploadBytes(storageRef, data.file);
-            fileUrl = await getDownloadURL(snapshot.ref);
+        // PDF එකක් තිබේ නම් එය Storage එකට Upload කිරීම
+        if (replyData.file) {
+            const fileRef = ref(storage, `replies/${id}_${Date.now()}.pdf`);
+            await uploadBytes(fileRef, replyData.file);
+            pdfUrl = await getDownloadURL(fileRef);
         }
 
-        const replyData = {
-            status: 'quoted',
-            replyMessage: data.message,
-            fileUrl,
-            items: data.items || [],
-            repliedAt: new Date().toISOString()
-        };
-
-        await updateDoc(docRef, replyData);
-        return { message: 'Reply sent successfully', ...replyData };
+        // Firestore එකේ Status එක Update කිරීම සහ Reply විස්තර සේව් කිරීම
+        const docRef = doc(db, "quotations", id);
+        return await updateDoc(docRef, {
+            status: 'replied',
+            reply_message: replyData.message,
+            reply_pdf_url: pdfUrl,
+            repliedAt: new Date()
+        });
+        
+        // සටහන: මෙහිදී Status එක 'replied' වූ සැනින් තවත් Cloud Function එකක් 
+        // මගින් පාරිභෝගිකයාට එම PDF එක සහිත Email එකක් යැවීමට සැකසිය හැක.
     },
 
-    async sendDirectQuote(data: { name: string, email: string, phone: string, items?: any[], message: string, mode?: 'create' | 'upload', file?: File }): Promise<any> {
-        let fileUrl = '';
-
-        if (data.mode === 'upload' && data.file) {
-            const storageRef = ref(storage, `quotations/${Date.now()}_${data.file.name}`);
-            const snapshot = await uploadBytes(storageRef, data.file);
-            fileUrl = await getDownloadURL(snapshot.ref);
-        }
-
-        const newDoc = {
+    // 4. Quotation Request එකක් Create කිරීම
+    async createQuotationRequest(data: { name: string; email: string; phone: string; message?: string; items: any[] }) {
+        return await addDoc(collection(db, "quotations"), {
             name: data.name,
             email: data.email,
             phone: data.phone,
-            message: data.message,
-            items: data.items || [],
-            fileUrl,
-            status: 'quoted',
-            createdAt: new Date().toISOString()
-        };
+            message: data.message || '',
+            items: data.items,
+            status: 'pending',
+            submittedAt: serverTimestamp()
+        });
+    },
 
-        const docRef = await addDoc(collection(db, 'quotations'), newDoc);
-        return { message: 'Direct quote sent', id: docRef.id };
+    // 5. Quotation එකක් Update කිරීම (Admin)
+    async updateQuotation(id: string, data: any) {
+        const docRef = doc(db, "quotations", id);
+        return await updateDoc(docRef, data);
     }
 };

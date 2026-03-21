@@ -30,5 +30,10 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    ".next",
+    "out",
+    "functions" // මේ පේළිය අනිවාර්යයෙන්ම තිබිය යුතුයි
+  ]
 }

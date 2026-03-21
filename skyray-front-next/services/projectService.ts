@@ -1,85 +1,94 @@
 import { db, storage } from '@/lib/firebase';
-import { collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, query, where } from 'firebase/firestore';
+import { 
+  collection, addDoc, getDocs, doc, deleteDoc, updateDoc,
+  query, orderBy, serverTimestamp 
+} from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { Project } from '../types';
 
 export const projectService = {
-    async getProjects(): Promise<Project[]> {
-        const querySnapshot = await getDocs(collection(db, 'projects'));
-        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Project));
-    },
+  // 1. සියලුම ප්‍රොජෙක්ට් ලබා ගැනීම
+  async getProjects() {
+    const q = query(collection(db, "projects"), orderBy("createdAt", "desc"));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  },
 
-    async getProjectById(id: string): Promise<Project> {
-        const docRef = doc(db, 'projects', id);
-        const docSnap = await getDoc(docRef);
-        if (!docSnap.exists()) {
-            throw new Error('Project not found');
-        }
-        return { id: docSnap.id, ...docSnap.data() } as Project;
-    },
+  // 2. අලුත් ප්‍රොජෙක්ට් එකක් නිර්මාණය කිරීම
+  async createProject(formData: any, thumbnailFile: File | null, galleryFiles: File[]) {
+    let thumbnailUrl = null;
+    const galleryUrls: string[] = [];
 
-    async getProjectsByClient(clientName: string): Promise<Project[]> {
-        const q = query(collection(db, 'projects'), where('client', '==', clientName));
-        const querySnapshot = await getDocs(q);
-        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Project));
-    },
-
-    async createProject(data: any, thumbnail: File | null, galleryImages: File[]): Promise<Project> {
-        let thumbnail_path = '';
-        let gallery_paths: string[] = [];
-
-        if (thumbnail) {
-            const storageRef = ref(storage, `projects/${Date.now()}_${thumbnail.name}`);
-            const snapshot = await uploadBytes(storageRef, thumbnail);
-            thumbnail_path = await getDownloadURL(snapshot.ref);
-        }
-
-        for (const file of galleryImages) {
-            const storageRef = ref(storage, `projects/gallery/${Date.now()}_${file.name}`);
-            const snapshot = await uploadBytes(storageRef, file);
-            gallery_paths.push(await getDownloadURL(snapshot.ref));
-        }
-
-        const newDoc = {
-            ...data,
-            thumbnail_path,
-            gallery_paths,
-            createdAt: new Date().toISOString()
-        };
-
-        const docRef = await addDoc(collection(db, 'projects'), newDoc);
-        return { id: docRef.id, ...newDoc } as Project;
-    },
-
-    async updateProject(id: string, data: any, thumbnail: File | null, existingGalleryImages: string[], newGalleryImages: File[]): Promise<void> {
-        const docRef = doc(db, 'projects', id);
-        let updates = { ...data };
-
-        if (thumbnail) {
-            const storageRef = ref(storage, `projects/${Date.now()}_${thumbnail.name}`);
-            const snapshot = await uploadBytes(storageRef, thumbnail);
-            updates.thumbnail_path = await getDownloadURL(snapshot.ref);
-        }
-
-        let combinedGallery = [...existingGalleryImages];
-
-        if (newGalleryImages && newGalleryImages.length > 0) {
-            for (const file of newGalleryImages) {
-                const storageRef = ref(storage, `projects/gallery/${Date.now()}_${file.name}`);
-                const snapshot = await uploadBytes(storageRef, file);
-                combinedGallery.push(await getDownloadURL(snapshot.ref));
-            }
-        }
-        
-        updates.gallery_paths = combinedGallery;
-        // Also keep project_image_urls in sync if it's used
-        updates.project_image_urls = combinedGallery;
-
-        await updateDoc(docRef, updates);
-    },
-
-    async deleteProject(id: string): Promise<void> {
-        const docRef = doc(db, 'projects', id);
-        await deleteDoc(docRef);
+    // Thumbnail එක Upload කිරීම
+    if (thumbnailFile) {
+      const thumbRef = ref(storage, `projects/thumbnails/${Date.now()}_${thumbnailFile.name}`);
+      await uploadBytes(thumbRef, thumbnailFile);
+      thumbnailUrl = await getDownloadURL(thumbRef);
     }
+
+    // Gallery පින්තූර එකින් එක Upload කිරීම
+    for (const file of galleryFiles) {
+      const fileRef = ref(storage, `projects/gallery/${Date.now()}_${file.name}`);
+      await uploadBytes(fileRef, file);
+      const url = await getDownloadURL(fileRef);
+      galleryUrls.push(url);
+    }
+
+    // Firestore එකට දත්ත ඇතුළත් කිරීම
+    return await addDoc(collection(db, "projects"), {
+      ...formData,
+      thumbnail_path: thumbnailUrl,
+      project_image_urls: galleryUrls,
+      createdAt: serverTimestamp()
+    });
+  },
+
+  // 3. ප්‍රොජෙක්ට් එකක් යාවත්කාලීන කිරීම (Update)
+  async updateProject(
+    id: string, 
+    formData: any, 
+    thumbnailFile: File | null, 
+    existingGalleryImages: string[], 
+    newGalleryImages: File[]
+  ) {
+    let thumbnailUrl = null;
+    const newGalleryUrls: string[] = [];
+
+    // නව Thumbnail එකක් තිබේ නම් Upload කිරීම
+    if (thumbnailFile) {
+      const thumbRef = ref(storage, `projects/thumbnails/${Date.now()}_${thumbnailFile.name}`);
+      await uploadBytes(thumbRef, thumbnailFile);
+      thumbnailUrl = await getDownloadURL(thumbRef);
+    }
+
+    // නව Gallery පින්තූර එකින් එක Upload කිරීම
+    for (const file of newGalleryImages) {
+      const fileRef = ref(storage, `projects/gallery/${Date.now()}_${file.name}`);
+      await uploadBytes(fileRef, file);
+      const url = await getDownloadURL(fileRef);
+      newGalleryUrls.push(url);
+    }
+
+    const updatedGallery = [...existingGalleryImages, ...newGalleryUrls];
+
+    const projectRef = doc(db, "projects", id);
+    const updateData: any = {
+      ...formData,
+      project_image_urls: updatedGallery,
+      updatedAt: serverTimestamp()
+    };
+
+    if (thumbnailUrl) {
+      updateData.thumbnail_path = thumbnailUrl;
+    }
+
+    await updateDoc(projectRef, updateData);
+  },
+
+  // 3. ප්‍රොජෙක්ට් එකක් මැකීම
+  async deleteProject(id: string) {
+    await deleteDoc(doc(db, "projects", id));
+  }
 };

@@ -47,7 +47,7 @@ export default function AddProjectPage() {
         setProjectsLoading(true);
         try {
             const data = await projectService.getProjects();
-            setProjects(Array.isArray(data) ? data : []);
+            setProjects(Array.isArray(data) ? (data as Project[]) : []);
         } catch (error) {
             console.error('Failed to fetch projects', error);
             toast.error('Failed to fetch projects');

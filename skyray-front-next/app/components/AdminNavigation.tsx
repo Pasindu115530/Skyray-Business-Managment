@@ -43,7 +43,6 @@ export default function AdminNavigation({ onLogout }: AdminNavigationProps) {
     { label: 'Products', href: '/admin/products', icon: Package },
     { label: 'Gallery', href: '/admin/gallery', icon: ImageIcon },
     { label: 'Quotation', href: '/admin/quotation', icon: Zap },
-    { label: 'Settings', href: '/admin/settings', icon: Settings },
   ];
 
   const isActive = (href: string) => pathname === href;

@@ -6,11 +6,19 @@ export interface QuotationItem {
 }
 
 export interface Quotation {
-    id: string;
-    name: string;
-    email: string;
+    id: number;
+    name?: string;
+    email?: string;
     phone?: string;
     customer_notes?: string;
+    
+    // Properties used in admin quotations page
+    customer_name: string;
+    customer_email: string;
+    customer_phone?: string;
+    message?: string;
+    item_details?: any[];
+
     // Relations
     user?: {
         id: string;
@@ -19,9 +27,8 @@ export interface Quotation {
     };
     products?: any[]; // or define Product type
     items?: QuotationItem[]; // For the reply/quote itself? Or request items?
-    // Request items are in 'products' via pivot in existing code, but let's stick to what we see in the table
-    // Table uses q.products and q.customer_notes
-    status: 'pending' | 'quoted' | 'closed';
+    status: string;
+    total_amount?: number;
     created_at: string;
     updated_at: string;
 }

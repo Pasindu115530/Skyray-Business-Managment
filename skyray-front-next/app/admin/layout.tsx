@@ -46,7 +46,6 @@ export default function AdminLayout({
         { name: 'Products Management', icon: Package, href: '/admin/products' },
         { name: 'Gallery', icon: Image, href: '/admin/gallery' },
         { name: 'Customers Management', icon: Users, href: '/admin/customers' },
-        { name: 'Settings', icon: Settings, href: '/admin/settings' },
     ];
 
     return (

@@ -23,7 +23,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { quotationService, Quotation } from '@/services/quotationService';
+import { quotationService, Quotation } from '@/app/services/quotationService';
 import { toast } from 'sonner';
 
 export default function AdminQuotationsPage() {

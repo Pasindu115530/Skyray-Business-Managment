@@ -1,5 +1,6 @@
 import { fetchFromApi } from './api';
 import { Quotation } from '../types/quotation';
+export type { Quotation };
 
 export const quotationService = {
     async getQuotations(): Promise<Quotation[]> {

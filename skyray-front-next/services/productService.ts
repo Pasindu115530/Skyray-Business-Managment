@@ -1,7 +1,7 @@
 import { db, storage } from '@/lib/firebase';
 import { 
   collection, addDoc, getDocs, doc, deleteDoc, 
-  query, orderBy, where, serverTimestamp 
+  query, orderBy, where, serverTimestamp, updateDoc 
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
@@ -61,5 +61,40 @@ export const productService = {
   // 3. නිෂ්පාදනයක් මැකීම
   async deleteProduct(id: string) {
     await deleteDoc(doc(db, "products", id));
+  },
+
+  // 4. නිෂ්පාදනයක් යාවත්කාලීන කිරීම (Update Product)
+  async updateProduct(id: string, formData: any, existingImages: string[], newImages: File[], datasheetFile: File | null) {
+    const imageUrls: string[] = [...existingImages];
+    let datasheetUrl = null;
+
+    // නව පින්තූර Upload කිරීම
+    for (const file of newImages) {
+      const imgRef = ref(storage, `products/${Date.now()}_${file.name}`);
+      await uploadBytes(imgRef, file);
+      const url = await getDownloadURL(imgRef);
+      imageUrls.push(url);
+    }
+
+    // නව Datasheet (PDF) එක Upload කිරීම
+    if (datasheetFile) {
+      const pdfRef = ref(storage, `datasheets/${Date.now()}_${datasheetFile.name}`);
+      await uploadBytes(pdfRef, datasheetFile);
+      datasheetUrl = await getDownloadURL(pdfRef);
+    }
+
+    const updateData: any = {
+      ...formData,
+      images: imageUrls,
+      image: imageUrls.length > 0 ? imageUrls[0] : null,
+      updatedAt: serverTimestamp()
+    };
+
+    if (datasheetUrl) {
+      updateData.datasheet_path = datasheetUrl;
+    }
+
+    const docRef = doc(db, "products", id);
+    return await updateDoc(docRef, updateData);
   }
 };

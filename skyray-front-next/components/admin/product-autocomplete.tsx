@@ -85,7 +85,7 @@ export function ProductAutocomplete({ value, onChange, onSelect, placeholder, cl
             setLoading(true);
             try {
                 const results = await productService.getProducts(searchTerm);
-                setProducts(results || []);
+                setProducts((results as Product[]) || []);
                 setOpen(true);
             } catch (error) {
                 console.error("Failed to search products", error);

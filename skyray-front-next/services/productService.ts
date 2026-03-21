@@ -1,92 +1,65 @@
 import { db, storage } from '@/lib/firebase';
-import { collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { Product } from '../types';
+import { 
+  collection, addDoc, getDocs, doc, deleteDoc, 
+  query, orderBy, where, serverTimestamp 
+} from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export const productService = {
-    async getProducts(search?: string): Promise<Product[]> {
-        const querySnapshot = await getDocs(collection(db, 'products'));
-        let products = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-        
-        if (search) {
-            const lowerSearch = search.toLowerCase();
-            products = products.filter(p => 
-                p.name?.toLowerCase().includes(lowerSearch) || 
-                p.description?.toLowerCase().includes(lowerSearch)
-            );
-        }
-        return products;
-    },
+  // 1. නිෂ්පාදන ලබා ගැනීම (සෙවුම් පහසුකම සහිතව)
+  async getProducts(searchQuery: string = '') {
+    const q = query(collection(db, "products"), orderBy("name", "asc"));
+    const querySnapshot = await getDocs(q);
+    
+    let products = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
 
-    async getProductById(id: string): Promise<Product> {
-        const docRef = doc(db, 'products', id);
-        const docSnap = await getDoc(docRef);
-        if (!docSnap.exists()) {
-            throw new Error('Product not found');
-        }
-        return { id: docSnap.id, ...docSnap.data() } as Product;
-    },
-
-    async createProduct(data: any, images: File[], datasheet: File | null): Promise<Product> {
-        let imageUrls: string[] = [];
-        let datasheetUrl = '';
-
-        for (const file of images) {
-            const storageRef = ref(storage, `products/${Date.now()}_${file.name}`);
-            const snapshot = await uploadBytes(storageRef, file);
-            imageUrls.push(await getDownloadURL(snapshot.ref));
-        }
-
-        if (datasheet) {
-            const storageRef = ref(storage, `datasheets/${Date.now()}_${datasheet.name}`);
-            const snapshot = await uploadBytes(storageRef, datasheet);
-            datasheetUrl = await getDownloadURL(snapshot.ref);
-        }
-
-        const newDoc = {
-            ...data,
-            images: imageUrls,
-            image: imageUrls.length > 0 ? imageUrls[0] : '', // Main image
-            datasheetUrl,
-            createdAt: new Date().toISOString()
-        };
-
-        const docRef = await addDoc(collection(db, 'products'), newDoc);
-        return { id: docRef.id, ...newDoc } as Product;
-    },
-
-    async updateProduct(id: string, data: any, existingImages: string[], newImages: File[], datasheet: File | null): Promise<void> {
-        const docRef = doc(db, 'products', id);
-        let updates = { ...data };
-
-        let combinedImages = [...existingImages];
-
-        if (newImages && newImages.length > 0) {
-            for (const file of newImages) {
-                const storageRef = ref(storage, `products/${Date.now()}_${file.name}`);
-                const snapshot = await uploadBytes(storageRef, file);
-                combinedImages.push(await getDownloadURL(snapshot.ref));
-            }
-        }
-        
-        updates.images = combinedImages;
-        if (combinedImages.length > 0) {
-            updates.image = combinedImages[0];
-        } else {
-            updates.image = '';
-        }
-
-        if (datasheet) {
-            const storageRef = ref(storage, `datasheets/${Date.now()}_${datasheet.name}`);
-            const snapshot = await uploadBytes(storageRef, datasheet);
-            updates.datasheetUrl = await getDownloadURL(snapshot.ref);
-        }
-
-        await updateDoc(docRef, updates);
-    },
-
-    async deleteProduct(id: string): Promise<void> {
-        const docRef = doc(db, 'products', id);
-        await deleteDoc(docRef);
+    // සරල Client-side සෙවුමක් (Firestore හි සංකීර්ණ සෙවුම් වෙනුවට)
+    if (searchQuery) {
+      const lowQuery = searchQuery.toLowerCase();
+      products = products.filter((p: any) => 
+        p.name?.toLowerCase().includes(lowQuery) || 
+        p.sku?.toLowerCase().includes(lowQuery) ||
+        p.category?.toLowerCase().includes(lowQuery)
+      );
     }
+    return products;
+  },
+
+  // 2. අලුත් නිෂ්පාදනයක් නිර්මාණය කිරීම
+  async createProduct(formData: any, imageFiles: File[], datasheetFile: File | null) {
+    const imageUrls: string[] = [];
+    let datasheetUrl = null;
+
+    // පින්තූර කිහිපයක් තිබේ නම් ඒවා එකින් එක Upload කිරීම
+    for (const file of imageFiles) {
+      const imgRef = ref(storage, `products/${Date.now()}_${file.name}`);
+      await uploadBytes(imgRef, file);
+      const url = await getDownloadURL(imgRef);
+      imageUrls.push(url);
+    }
+
+    // Datasheet (PDF) එක Upload කිරීම
+    if (datasheetFile) {
+      const pdfRef = ref(storage, `datasheets/${Date.now()}_${datasheetFile.name}`);
+      await uploadBytes(pdfRef, datasheetFile);
+      datasheetUrl = await getDownloadURL(pdfRef);
+    }
+
+    // Firestore එකට දත්ත ඇතුළත් කිරීම
+    return await addDoc(collection(db, "products"), {
+      ...formData,
+      images: imageUrls, // පින්තූර ලැයිස්තුව
+      image: imageUrls.length > 0 ? imageUrls[0] : null, // ප්‍රධාන පින්තූරය
+      datasheet_path: datasheetUrl,
+      createdAt: serverTimestamp()
+    });
+  },
+
+  // 3. නිෂ්පාදනයක් මැකීම
+  async deleteProduct(id: string) {
+    await deleteDoc(doc(db, "products", id));
+  }
 };

@@ -36,7 +36,7 @@ function ProductContent() {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        const data = await productService.getProducts();
+        const data = await productService.getProducts() as any[];
         const filtered = categoryId ? data.filter(p => p.category === categoryId) : data;
         
         // Map to expected structure and ensure string ID

@@ -109,13 +109,13 @@ export default function AdminProductsPage() {
       }
 
       await productService.createProduct({
-        name: formData.name,
-        description: formData.description,
-        price: formData.price,
-        category: formData.category,
-        stock: formData.stock,
-        sku: formData.sku
-      }, imageFiles, datasheetFile);
+    name: formData.name,
+    description: formData.description,
+    price: parseFloat(formData.price), // ඉලක්කමක් ලෙස යැවීම වඩා හොඳයි
+    category: formData.category,
+    stock: parseInt(formData.stock),   // ඉලක්කමක් ලෙස
+    sku: formData.sku
+}, imageFiles, datasheetFile);
 
       toast.success('Product created successfully');
       router.refresh();

@@ -1,5 +1,8 @@
 import * as nodemailer from "nodemailer";
 import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/firestore";
+import { setGlobalOptions } from "firebase-functions/v2";
+
+setGlobalOptions({ region: "asia-southeast1" });  
 
 const transporter = nodemailer.createTransport({
   host: "mail.sreng.lk",

@@ -7,10 +7,11 @@ import { galleryService } from '@/services/galleryService';
 
 interface GalleryImage {
   id: string;
-  url: string;
+  image_path: string; // url වෙනුවට image_path ලෙස වෙනස් කරන්න
   category: string;
   title: string;
   description: string;
+  storage_path?: string; // පින්තූරය delete කිරීමට මෙයත් තිබීම වැදගත්
 }
 
 const categories = ['All', 'Projects', 'Panels', 'Automation', 'Training', 'Installations'];
@@ -28,7 +29,7 @@ export default function Gallery() {
         const data = await galleryService.getGalleryImages();
         const mappedData = data.map((item: any) => ({
           id: item.id,
-          url: item.image_url,
+          image_path: item.image_path,
           category: item.category,
           title: item.title,
           description: item.description || '',
@@ -156,7 +157,7 @@ export default function Gallery() {
                 >
                   {/* Image */}
                   <motion.img
-                    src={image.url}
+                    src={image.image_path}
                     alt={image.title}
                     className="w-full h-full object-cover"
                     whileHover={{ scale: 1.1 }}
@@ -263,7 +264,7 @@ export default function Gallery() {
               onClick={(e) => e.stopPropagation()}
             >
               <img
-                src={lightboxImage.url}
+                src={lightboxImage.image_path}
                 alt={lightboxImage.title}
                 className="w-full h-full object-contain rounded-lg"
               />

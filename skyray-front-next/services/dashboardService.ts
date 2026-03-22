@@ -1,65 +1,54 @@
 import { db } from '@/lib/firebase';
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 
-export interface DashboardStats {
-    stats: {
-        total: number;
-        pending: number;
-        quoted: number;
-        reviewed: number;
-    };
-    recent_requests: {
-        id: string;
-        customer: string;
-        email: string;
-        date: string;
-        status: string;
-        amount: string;
-    }[];
-}
-
 export const dashboardService = {
-    async getStats(): Promise<DashboardStats> {
+    async getStats() {
         try {
-            const requestsRef = collection(db, 'quotation_requests');
-            const allDocs = await getDocs(requestsRef);
-            
-            let total = 0, pending = 0, quoted = 0, reviewed = 0;
-            
-            allDocs.forEach(doc => {
-                total++;
-                const data = doc.data();
-                if (data.status === 'pending') pending++;
-                if (data.status === 'quoted') quoted++;
-                if (data.status === 'reviewed') reviewed++;
-            });
+            const querySnapshot = await getDocs(collection(db, "quotations"));
+            const allDocs = querySnapshot.docs.map(doc => doc.data());
 
-            const recent_requests: any[] = [];
-            const recentQuery = query(requestsRef, orderBy('createdAt', 'desc'), limit(5));
-            const recentDocs = await getDocs(recentQuery);
-            
-            recentDocs.forEach(doc => {
-                const data = doc.data();
-                recent_requests.push({
-                    id: doc.id,
-                    customer: data.name || data.customer || 'Unknown',
-                    email: data.email || '',
-                    date: data.createdAt?.toDate ? data.createdAt.toDate().toLocaleDateString() : new Date().toLocaleDateString(),
-                    status: data.status || 'pending',
-                    amount: data.amount ? `$${data.amount}` : 'N/A'
-                });
-            });
-
-            return {
-                stats: { total, pending, quoted, reviewed },
-                recent_requests
+            // ප්‍රමාණ ගණනය කිරීම (Stats Calculation)
+            const stats = {
+                total: allDocs.length,
+                pending: allDocs.filter(d => d.status === 'pending').length,
+                quoted: allDocs.filter(d => d.status === 'replied').length,
+                reviewed: allDocs.filter(d => d.status === 'rejected').length, // හෝ වෙනත් status එකක්
             };
+
+            // අලුත්ම ඉල්ලීම් 5 ලබා ගැනීම (Recent 5 Requests)
+            const recentQuery = query(
+                collection(db, "quotations"), 
+                orderBy("submittedAt", "desc"), 
+                limit(5)
+            );
+            const recentSnapshot = await getDocs(recentQuery);
+            
+            const recent_requests = recentSnapshot.docs.map(doc => {
+                const d = doc.data();
+                return {
+                    id: doc.id.substring(0, 6).toUpperCase(), // කෙටි ID එකක් පෙන්වීමට
+                    customer: d.name,
+                    email: d.email,
+                    date: d.submittedAt?.toDate().toLocaleDateString() || 'N/A',
+                    status: this.mapStatus(d.status),
+                    amount: d.estimated_amount || '-' // ඔබට අවශ්‍ය නම් මුදලක් එකතු කළ හැක
+                };
+            });
+
+            return { stats, recent_requests };
         } catch (error) {
-            console.error('Error fetching dashboard stats from Firebase:', error);
-            return {
-                stats: { total: 0, pending: 0, quoted: 0, reviewed: 0 },
-                recent_requests: []
-            };
+            console.error("Error fetching dashboard stats:", error);
+            throw error;
         }
     },
+
+    // UI එකේ ඇති Status නම් වලට ගැලපෙන සේ සැකසීම
+    mapStatus(status: string) {
+        switch(status?.toLowerCase()) {
+            case 'replied': return 'Quoted';
+            case 'pending': return 'Pending';
+            case 'rejected': return 'Rejected';
+            default: return 'Pending';
+        }
+    }
 };

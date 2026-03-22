@@ -3,7 +3,11 @@ import { onDocumentCreated, onDocumentUpdated } from "firebase-functions/v2/fire
 import { setGlobalOptions } from "firebase-functions/v2";
 
 // සිංගප්පූරු Region එක භාවිතා කිරීම (ලංකාවට වේගවත්ම සහ ආසන්නතම Region එක)
-setGlobalOptions({ region: "asia-southeast1" });
+setGlobalOptions({ 
+  region: "asia-southeast1",
+  timeoutSeconds: 60, // කාලය තත්පර 60 දක්වා වැඩි කරන්න
+  memory: "256MiB"    // මතකය තරමක් වැඩි කරන්න
+});
 
 /**
  * ඊමේල් යැවීම සඳහා අවශ්‍ය Transporter එක සකස් කිරීම.

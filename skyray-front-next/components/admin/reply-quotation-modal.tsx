@@ -280,7 +280,7 @@ export default function ReplyModal({ isOpen, onClose, request, onSend }: ReplyMo
                         <div className="space-y-2 pb-6">
                             <label className="text-sm font-medium">Message to Customer</label>
                             <textarea
-                                className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                className="flex min-h-[100px] w-full rounded-md border border-input bg-white text-slate-900 px-3 py-2 text-sm ring-offset-background placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                 placeholder="Add a personal note..."
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}

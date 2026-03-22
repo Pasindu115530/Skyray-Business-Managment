@@ -6,8 +6,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     LayoutDashboard,
     FolderPlus,
-    Users,
-    Settings,
     LogOut,
     Menu,
     X,
@@ -45,7 +43,6 @@ export default function AdminLayout({
         { name: 'Projects Management', icon: FolderPlus, href: '/admin/projects' },
         { name: 'Products Management', icon: Package, href: '/admin/products' },
         { name: 'Gallery', icon: Image, href: '/admin/gallery' },
-        { name: 'Customers Management', icon: Users, href: '/admin/customers' },
     ];
 
     return (
@@ -139,7 +136,7 @@ export default function AdminLayout({
             </motion.aside>
 
             {/* Main Content */}
-            <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50">
+            <div className="flex-1 flex flex-col min-w-0 bg-slate-50">
                 {/* Top Header - Glass Effect */}
                 <header className="h-16 flex items-center justify-between px-6 sticky top-0 z-30
                     bg-white/80 backdrop-blur-md border-b border-slate-200/60 shadow-sm transition-all duration-200">
